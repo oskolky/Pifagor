@@ -1,0 +1,119 @@
+:root {
+  --blue-dark: #1e3a8a;
+  --blue: #2563eb;
+  --cyan: #06b6d4;
+  --accent: #f9ab01;
+  --bg: #f5f7fa;
+  --text: #1f2937;
+  --muted: #6b7280;
+
+  --radius: 16px;
+
+  --font-unbounded: 'Unbounded', sans-serif;
+  --font-futura: 'Futura PT', sans-serif;
+
+  --letter-spacing-tight: -0.05em;
+  --line-height-tight: 1;
+
+  --text-display: 120px;
+  --text-h1: 52px;
+  --text-h2: 34px;
+  --text-h3: 24px;
+  --text-body-lg: 18px;
+  --text-body: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  font-family: var(--font-futura);
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.text-display-unbounded,
+.text-display-futura,
+.text-h1-unbounded,
+.text-h1-futura,
+.text-h2,
+.text-h3,
+.text-body-lg,
+.text-body {
+  font-weight: 400;
+  font-style: normal;
+}
+
+.text-display-unbounded,
+.text-display-futura,
+.text-h1-unbounded,
+.text-h1-futura {
+  line-height: var(--line-height-tight);        /* 1 */
+  letter-spacing: var(--letter-spacing-tight);  /* -0.05em */
+}
+
+.text-h2, .text-h3, .text-body-lg, .text-body {
+  line-height: 1.4;       /* Свободный интервал, чтобы строки не накладывались */
+  letter-spacing: normal;
+}
+
+.text-display-unbounded {
+  font-family: var(--font-unbounded);
+  font-size: var(--text-display);
+}
+
+.text-display-futura {
+  font-family: var(--font-futura);
+  font-size: var(--text-display);
+}
+
+.text-h1-unbounded {
+  font-family: var(--font-unbounded);
+  font-size: var(--text-h1);
+}
+
+.text-h1-futura {
+  font-family: var(--font-futura);
+  font-size: var(--text-h1);
+}
+
+.text-h2 {
+  font-family: var(--font-futura);
+  font-size: var(--text-h2);
+}
+
+.text-h3 {
+  font-family: var(--font-futura);
+  font-size: var(--text-h3);
+}
+
+.text-body-lg {
+  font-family: var(--font-futura);
+  font-size: var(--text-body-lg);
+}
+
+.text-body {
+  font-family: var(--font-futura);
+  font-size: var(--text-body);
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --text-display: 72px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --text-display: 52px;
+    --text-h1: 36px;
+    --text-h2: 28px;
+  }
+}
