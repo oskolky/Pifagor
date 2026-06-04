@@ -23,7 +23,7 @@
   display: flex;
   align-items: center;
   gap: 48px;
-  padding: 12px 60px;
+  padding: 0px 60px;
   min-height: 88px;
   background: #fff;
   border-bottom: 1px solid #eef0f4;
@@ -139,7 +139,7 @@
       rgba(64, 168, 197, 1) 40%,  /* Бирюзовый #40a8c5 с прозрачностью 85% */
       rgba(36, 89, 133, 1) 100%   /* Синий #245985 с прозрачностью 96% */
     ),
-    url('./assets/formulas0.4.png');
+    url('./assets/main_page/formulas0.4.png');
 
   background-size: cover;
   background-position: center;
@@ -303,7 +303,7 @@
 /* ── Sections ── */
 
 .section-title {
-  padding: 48px 60px 0;
+  padding: 48px 0px 20px;
   margin: 0;
 }
 
@@ -314,23 +314,73 @@
 .container {
   max-width: 1280px;
   margin: 0 auto;
-  padding-left: 60px;
   padding-right: 60px;
 }
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 580px);
   gap: 20px;
-  padding: 40px 0;
 }
 
 .card {
+  position: relative;
+  overflow: hidden;
+  min-height: 240px;
   background: white;
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease;
+
+}
+
+.card-icon {
+  position: absolute;
+  overflow: hidden;
+  top: -7px;
+  right: 60px;
+
+  width: 180px;
+  height: 207px;
+
+  object-fit: contain;
+
+  pointer-events: none;
+}
+
+.card-math {
+  background: #2459851A;
+}
+
+.card-physics {
+  background: #40A8C51A;
+}
+
+.card-english {
+  background: #F9AB011A;
+}
+
+.card-chemistry {
+  background: #23E2AF1A;
+}
+
+.card-math .card-icon {
+  color: #cfdceb;
+}
+
+.card-physics .card-icon {
+  color: #b8e6f3;
+  width: 170px
+}
+
+.card-english .card-icon {
+  color: #f5dfab;
+  width: 228px
+}
+
+.card-chemistry .card-icon {
+  color: #9ef1dc;
 }
 
 .card:hover {
@@ -349,15 +399,84 @@
 }
 
 .card button {
-  margin-top: 12px;
+  margin-top: 30px;
   padding: 10px 16px;
   border-radius: 8px;
   border: none;
-  background: #3b82f6;
   color: white;
   cursor: pointer;
   font-family: var(--font-futura);
-  font-size: var(--text-body);
+  font-size: var(--text-h3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card button:hover {
+  transform: translateY(-3px);
+}
+
+.button-arrow {
+  width: 10px;
+  height: auto;
+  display: block;
+  transform: translateY(4px);
+}
+
+.card button {
+  margin-top: 30px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-family: var(--font-futura);
+  font-size: var(--text-h3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card button:hover {
+  transform: translateY(-3px);
+}
+
+.card-math button {
+  background: #245985;
+  box-shadow: 0px 4px 12px rgba(36, 89, 133, 0.35), 0px 12px 24px rgba(36, 89, 133, 0.2);
+}
+
+.card-math button:hover {
+  box-shadow: 0px 8px 16px rgba(36, 89, 133, 0.5), 0px 16px 32px rgba(36, 89, 133, 0.3);
+}
+
+.card-physics button {
+  background: #40A8C5;
+  box-shadow: 0px 4px 12px rgba(64, 168, 197, 0.4), 0px 12px 24px rgba(64, 168, 197, 0.25);
+}
+
+.card-physics button:hover {
+  box-shadow: 0px 8px 16px rgba(64, 168, 197, 0.55), 0px 16px 32px rgba(64, 168, 197, 0.35);
+}
+
+.card-english button {
+  background: #F9AB01;
+  box-shadow: 0px 4px 12px rgba(249, 171, 1, 0.35), 0px 12px 24px rgba(249, 171, 1, 0.2);
+}
+
+.card-english button:hover {
+  box-shadow: 0px 8px 16px rgba(249, 171, 1, 0.5), 0px 16px 32px rgba(249, 171, 1, 0.3);
+}
+
+.card-chemistry button {
+  background: #23E2AF;
+  box-shadow: 0px 4px 12px rgba(35, 226, 175, 0.45), 0px 12px 24px rgba(35, 226, 175, 0.25);
+}
+
+.card-chemistry button:hover {
+  box-shadow: 0px 8px 16px rgba(35, 226, 175, 0.6), 0px 16px 32px rgba(35, 226, 175, 0.35);
 }
 
 /* ── Pricing ── */
@@ -374,7 +493,7 @@
 }
 
 .price-left {
-  background: white;
+  background: #2459850D;
   padding: 30px;
   flex: 1;
 }
@@ -385,7 +504,7 @@
 
 .price-value {
   color: #ef4444;
-  margin: 10px 0;
+  margin: 10px 0 24px 0;
 }
 
 .price-feature {
@@ -400,24 +519,40 @@
   padding: 13px 0;
   cursor: pointer;
   font-family: var(--font-futura);
-  font-size: var(--text-body);
+  font-size: var(--text-h3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.price-btn:hover {
+  transform: translateY(-3px);
 }
 
 .price-btn--primary {
-  background: #f9ab01;
+  background: #245985;
   color: #fff;
   border: none;
+  box-shadow:
+    0px 4px 6px -4px #1152D440,
+    0px 10px 15px -3px #1152D440;
 }
 
 .price-btn--outline {
   background: transparent;
-  color: #1e3a8a;
-  border: 1.5px solid #1e3a8a;
+  color: #334155;
+  border: 1.5px solid #A0EAFF;
 }
 
 .price-right {
   flex: 1;
-  background: linear-gradient(135deg, #1e3a8a, #06b6d4);
+  background: /* 1. Верхний слой: размытый белый свет для сочности центра */
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 80%),
+
+    /* 2. Нижний слой: переход из светлого центра через сочный бирюзовый в фирменный синий */
+    radial-gradient(circle at center,
+      #5bcbf5 0%,    /* Светлая голубая основа в центре */
+      #40a8c5 8%,   /* Тот самый яркий бирюзовый из логотипа */
+      #245985 85%    /* Края: ваш базовый синий цвет */
+    );
   color: white;
   display: flex;
   align-items: center;
@@ -430,8 +565,8 @@
 }
 
 .price-right .logo {
-  margin: 0 auto 16px;
-  height: 80px;
+  margin: 0 auto -10px;
+  height: 115px;
 }
 
 .price-right-tagline {

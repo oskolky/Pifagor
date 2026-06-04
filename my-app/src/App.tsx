@@ -1,59 +1,54 @@
 import { useState } from "react";
 import './App.css';
+import './index.css'
 import { Logo } from './components/Logo';
-import mainImg from './assets/main_statue.png';
+import mainImg from './assets/main_page/main_statue.png';
 import waveImg from './assets/wave.svg';
+import mathIcon from './assets/main_page/cards/math.png';
+import physicsIcon from './assets/main_page/cards/physics.png';
+import englishIcon from './assets/main_page/cards/english.png';
+import chemistryIcon from './assets/main_page/cards/chem.png';
+import arrowIcon from "./assets/main_page/cards/arrow.png";
+import icon1 from "./assets/main_page/price/check.png";
+import icon2 from "./assets/main_page/price/check2.png";
+import icon3 from "./assets/main_page/price/time.png";
+import icon4 from "./assets/main_page/price/assess.png";
+import selectArrow from "./assets/select.svg";
 
 const SUBJECTS = [
   {
     title: "Математика",
-    desc: "Подготовка к экзаменам, решение задач любой сложности и разбор тем",
-    icon: (
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-        <text x="2" y="42" fontSize="44" fill="#F5A623" fontFamily="Georgia, serif">Σ</text>
-      </svg>
-    ),
+    className: "card-math",
+    icon: mathIcon,
+    desc: "Разбор сложных тем, уравнений и подготовка к экзаменам",
   },
   {
     title: "Физика",
-    desc: "Подготовка к экзаменам, решение задач любой сложности и разбор тем",
-    icon: (
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-        <ellipse cx="26" cy="26" rx="9" ry="22" stroke="#0ea5e9" strokeWidth="2.5" fill="none" />
-        <ellipse cx="26" cy="26" rx="22" ry="9" stroke="#0ea5e9" strokeWidth="2.5" fill="none" />
-        <circle cx="26" cy="26" r="4" fill="#0ea5e9" />
-      </svg>
-    ),
+    className: "card-physics",
+    icon: physicsIcon,
+    desc: "Понимание формул, решение задач и подготовка к тестам",
   },
   {
     title: "Английский язык",
-    desc: "Подготовка к экзаменам, решение задач любой сложности и разбор тем",
-    icon: (
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-        <text x="2" y="36" fontSize="22" fill="#F5A623" fontFamily="Georgia, serif" fontWeight="bold">ABC</text>
-      </svg>
-    ),
+    className: "card-english",
+    icon: englishIcon,
+    desc: "Разговорная практика, грамматика и подготовка к экзаменам",
   },
   {
     title: "Химия",
-    desc: "Подготовка к экзаменам, решение задач любой сложности и разбор тем",
-    icon: (
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-        <path d="M20 6 L20 26 L8 44 L44 44 L32 26 L32 6 Z" stroke="#0ea5e9" strokeWidth="2.5" fill="none" strokeLinejoin="round" />
-        <line x1="18" y1="12" x2="34" y2="12" stroke="#0ea5e9" strokeWidth="2" />
-        <circle cx="22" cy="34" r="3" fill="#0ea5e9" opacity="0.6" />
-        <circle cx="32" cy="36" r="2" fill="#F5A623" opacity="0.8" />
-      </svg>
-    ),
+    className: "card-chemistry",
+    icon: chemistryIcon,
+    desc: "Изучение реакций, разбор теории и помощь с задачами",
   },
 ];
 
 const PRICING_FEATURES = [
-  "Профессиональные репетиторы",
-  "Контроль прогресса",
-  "Мини-группы",
-  "Профессиональная платформа",
-];
+  { text: "Индивидуальные занятия", icon: icon1 },
+  { text: "Контроль прогресса", icon: icon4 },
+  { text: "Гибкое расписание", icon: icon3 },
+  { text: "Профессиональные репетиторы", icon: icon2 },
+]
+
 
 const REVIEWS = [
   {
@@ -103,6 +98,8 @@ export default function PifagorHome() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
 
   return (
     <div className="app">
@@ -145,13 +142,9 @@ export default function PifagorHome() {
         </div>
 
         <form className="hero-form" onSubmit={e => e.preventDefault()}>
-           <div className="hero-form-info">
-            <div className="hero-form-small">
-              Не уверены в знаниях?
-            </div>
-            <div className="hero-form-big">
-              Запишитесь на пробное!
-            </div>
+          <div className="hero-form-info">
+            <div className="hero-form-small">Не уверены в знаниях?</div>
+            <div className="hero-form-big">Запишитесь на пробное!</div>
           </div>
 
           <input
@@ -168,20 +161,40 @@ export default function PifagorHome() {
             onChange={e => setPhone(e.target.value)}
           />
 
-          <select
-            className={subject ? undefined : "hero-form-select--placeholder"}
-            value={subject}
-            onChange={e => setSubject(e.target.value)}
-          >
-            <option value="" disabled>
-              Предмет
-            </option>
-            {SUBJECTS.map(s => (
-              <option key={s.title} value={s.title}>
-                {s.title}
-              </option>
-            ))}
-          </select>
+          {/* ВСТАВЛЯЕМ СЮДА ОБНОВЛЕННЫЙ КАСТОМНЫЙ ДРОПДАУН */}
+          <div className="select-wrapper">
+            <div
+              className={`select-trigger ${!subject ? "placeholder" : ""}`}
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <span>{subject || "Предмет"}</span>
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className={`select-arrow-icon ${isOpen ? "is-open" : ""}`}
+              >
+                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+
+            {isOpen && (
+              <div className="select-dropdown">
+                {SUBJECTS.map(s => (
+                  <div
+                    key={s.title}
+                    className={`select-option ${subject === s.title ? "selected" : ""}`}
+                    onClick={() => {
+                      setSubject(s.title);
+                      setIsOpen(false);
+                    }}
+                  >
+                    {s.title}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           <button type="submit" className="hero-form-btn">
             Записаться
@@ -192,46 +205,70 @@ export default function PifagorHome() {
       <WaveDivider variant="hero" />
 
       <div className="container" style={{ paddingTop: 32 }}>
-        <h2 className="section-title text-h2" style={{ paddingLeft: 0, paddingRight: 0 }}>Чему научим?</h2>
+        <h2 className="section-title text-h1-unbounded" style={{ paddingLeft: 0, paddingRight: 0 }}>Чему научим?</h2>
       </div>
 
       <div className="cards container">
         {SUBJECTS.map(s => (
-          <div className="card" key={s.title}>
+          <div className={`card ${s.className}`} key={s.title}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div style={{ flex: 1 }}>
-                <h3 className="text-h3">{s.title}</h3>
-                <p className="text-body">{s.desc}</p>
+                <h3 className="text-h1-futura">{s.title}</h3>
+                <p className="text-body-lg" style={{ maxWidth: '280px' }}>{s.desc}</p>
               </div>
-              <div style={{ marginLeft: 16, flexShrink: 0 }}>{s.icon}</div>
+                  <img
+                    src={s.icon}
+                    alt=""
+                    className="card-icon"
+                  />
             </div>
-            <button>Узнать больше →</button>
+            <button>
+                Узнать больше
+                <img src={arrowIcon} alt="Стрелка" className="button-arrow" />
+            </button>
           </div>
         ))}
       </div>
 
       <div className="container">
-        <h2 className="section-title section-title--compact text-h2" style={{ paddingLeft: 0, paddingRight: 0 }}>Цены</h2>
+        <h2 className="section-title section-title--compact text-h1-unbounded" style={{ paddingTop: 30, paddingLeft: 0, paddingRight: 0 }}>Цены</h2>
       </div>
 
       <div className="price-section container">
         <div className="price-box">
           <div className="price-left">
-            <h2 className="text-body-lg">Стоимость одного занятия</h2>
-            <div className="price-value text-h1-futura">40 BYN</div>
+            <h2 className="text-h1-futura">Стоимость одного занятия</h2>
+            <div className="price-value text-h1-unbounded">40 BYN</div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px", margin: "16px 0 24px" }}>
               {PRICING_FEATURES.map(f => (
-                <div key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                /* В качестве key теперь используем уникальный текст f.text */
+                <div key={f.text} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+
+                  {/* Контейнер для картинки */}
                   <div style={{
-                    width: 18, height: 18, borderRadius: "50%", background: "#e0f8f4",
-                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+                    width: 32,                /* Общая ширина квадратика */
+                    height: 32,               /* Общая высота квадратика */
+                    backgroundColor: "#2459851A", /* Светлый серо-голубой фон как на скриншоте */
+                    borderRadius: "8px",      /* Мягкое скругление углов квадрата */
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    padding: "6px",           /* Внутренний отступ, чтобы сама иконка внутри была поменьше */
+                    boxSizing: "border-box"
                   }}>
-                    <svg width="10" height="10" viewBox="0 0 10 10">
-                      <path d="M2 5l2 2 4-4" stroke="#0ea5e9" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    </svg>
+                    {/* Подставляем уникальную картинку для каждого пункта */}
+                    <img
+                      src={f.icon}
+                      alt=""
+                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                    />
                   </div>
-                  <span className="price-feature text-body">{f}</span>
+
+                  {/* Выводим текст текущего пункта */}
+                  <span className="price-feature text-body-lg">{f.text}</span>
+
                 </div>
               ))}
             </div>
@@ -245,13 +282,9 @@ export default function PifagorHome() {
           <div className="price-right">
             <div className="price-right-inner">
               <Logo variant="footer" />
-              <div className="price-right-tagline text-h2">
+              <div className="price-right-tagline text-h1-futura">
                 Понимай, за<br />что платишь.
               </div>
-              <p className="price-right-desc text-body">
-                Прозрачные цены, без скрытых платежей.<br />
-                Пробное занятие — бесплатно.
-              </p>
             </div>
           </div>
         </div>
