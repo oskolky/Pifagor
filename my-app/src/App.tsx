@@ -4,6 +4,7 @@ import './index.css'
 import { Logo } from './components/Logo';
 import mainImg from './assets/main_page/main_statue.png';
 import waveImg from './assets/wave.svg';
+import waveBottomImg from "./assets/wave_bottom.svg"
 import mathIcon from './assets/main_page/cards/math.png';
 import physicsIcon from './assets/main_page/cards/physics.png';
 import englishIcon from './assets/main_page/cards/english.png';
@@ -14,6 +15,9 @@ import icon2 from "./assets/main_page/price/check2.png";
 import icon3 from "./assets/main_page/price/time.png";
 import icon4 from "./assets/main_page/price/assess.png";
 import selectArrow from "./assets/select.svg";
+import tg from "./assets/tg.png";
+import vb from "./assets/vb.png";
+import inst from "./assets/inst.png";
 
 const SUBJECTS = [
   {
@@ -69,15 +73,42 @@ const REVIEWS = [
     rating: 5,
     text: "Спасибо школе Пифагор за отличную организацию. Результат превзошёл ожидания.",
   },
+  {
+    name: "Игорь",
+    role: "Ученик",
+    rating: 5,
+    text: "Готовился здесь к ЦЭ по физике. Атмосфера крутая, преподаватели не грузят лишней теорией, дают только то, что реально будет на тесте.",
+  },
+  {
+    name: "Елена Викторовна",
+    role: "Мама одиннадцатиклассника",
+    rating: 5,
+    text: "Долго искали хорошего репетитора по математике. В Пифагоре нашли индивидуальный подход. Сын перестал бояться сложных задач и сдал экзамен на высокий балл.",
+  },
+  {
+    name: "Максим",
+    role: "Ученик",
+    rating: 5,
+    text: "Занимался онлайн. Сначала сомневался в таком формате, но интерактивная доска и разборы домашних заданий оказались даже удобнее обычных уроков.",
+  },
+  {
+    name: "Наталья",
+    role: "Мама выпускницы",
+    rating: 5,
+    text: "Благодарны всей команде центра! Дочка подтянула средний балл в школе и поступила на бюджет, куда и планировала. Рекомендую однозначно.",
+  }
 ];
 
 const NAV_MAIN = ["Предметы", "Репетиторы", "Цены"];
 const NAV_SECONDARY = ["Отзывы", "Личный кабинет", "О нас"];
 
-function WaveDivider({ variant }: { variant: 'hero' | 'footer' }) {
+export function WaveDivider({ variant }) {
+  // Если вариант hero — берем старую волну, если footer — новую
+  const currentImg = variant === 'hero' ? waveImg : waveBottomImg;
+
   return (
     <div className={`wave-divider wave-divider--${variant}`} aria-hidden="true">
-      <img src={waveImg} alt="" />
+      <img src={currentImg} alt="" />
     </div>
   );
 }
@@ -240,22 +271,22 @@ export default function PifagorHome() {
             <h2 className="text-h1-futura">Стоимость одного занятия</h2>
             <div className="price-value text-h1-unbounded">40 BYN</div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px", margin: "16px 0 24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px", margin: "16px 0 24px 30px" }}>
               {PRICING_FEATURES.map(f => (
                 /* В качестве key теперь используем уникальный текст f.text */
                 <div key={f.text} style={{ display: "flex", alignItems: "center", gap: 8 }}>
 
                   {/* Контейнер для картинки */}
                   <div style={{
-                    width: 32,                /* Общая ширина квадратика */
-                    height: 32,               /* Общая высота квадратика */
+                    width: 38,                /* Общая ширина квадратика */
+                    height: 38,               /* Общая высота квадратика */
                     backgroundColor: "#2459851A", /* Светлый серо-голубой фон как на скриншоте */
                     borderRadius: "8px",      /* Мягкое скругление углов квадрата */
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
-                    padding: "6px",           /* Внутренний отступ, чтобы сама иконка внутри была поменьше */
+                    padding: "10px",           /* Внутренний отступ, чтобы сама иконка внутри была поменьше */
                     boxSizing: "border-box"
                   }}>
                     {/* Подставляем уникальную картинку для каждого пункта */}
@@ -290,21 +321,125 @@ export default function PifagorHome() {
         </div>
       </div>
 
-      <div className="reviews container">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <h2 className="text-h2" style={{ margin: 0 }}>Отзывы наших клиентов</h2>
-          <div style={{ display: "flex", gap: 8 }}>
-            {["←", "→"].map((a, i) => (
-              <button key={i} type="button" style={{
-                width: 38, height: 38, borderRadius: "50%", border: "1.5px solid #ddd",
-                background: "#fff", cursor: "pointer", color: "#444"
-              }} className="text-body">{a}</button>
-            ))}
-          </div>
-        </div>
+      <ReviewsSlider reviewsData={REVIEWS} StarsComponent={Stars} />
 
-        <div className="review-list">
-          {REVIEWS.map(r => (
+      <WaveDivider variant="footer" />
+
+      <div className="footer-wrap">
+
+
+  <footer className="footer">
+    <div className="container footer-grid">
+
+      {/* 1 КОЛОНКА: Логотип и Юридическая информация */}
+      <div className="footer-info-col">
+        <div className="footer-logo-box">
+          <Logo variant="footer" />
+        </div>
+        <p className="footer-address text-h3">
+          ООО «Пифагор Центр», УНП 193900047<br />
+          Юридический адрес: 220019 г. Минск,<br />
+          ул. Сухаревская, д. 16<br />
+          Свидетельство регистрации от 20.08.2025,<br />
+          выдано Минским горисполкомом<br />
+          Режим работы: пн–пт 10:00–20:00
+        </p>
+      </div>
+
+      {/* 2 КОЛОНКА: Ссылки меню */}
+      <div className="footer-menu-col">
+        <p className="footer-link">Предметы</p>
+        <p className="footer-link">Репетиторы</p>
+        <p className="footer-link">Цены</p>
+        <p className="footer-link">Отзывы</p>
+        <p className="footer-link">Личный кабинет</p>
+        <p className="footer-link">О нас</p>
+      </div>
+
+      {/* 3 КОЛОНКА: Кнопка, текст и соцсети */}
+      <div className="footer-actions-col">
+        <button type="button" className="footer-cta-btn">
+          Присоединиться к занятиям
+        </button>
+
+        <div className="footer-social-box">
+          <p className="footer-social-title">Хочешь узнать больше?<br />Напиши нам!</p>
+
+          <div className="footer-social-icons">
+              <div className="social-icon instagram">
+                <img src={inst} alt="Instagram" />
+              </div>
+
+              <div className="social-icon telegram">
+                <img src={tg} alt="Telegram" />
+              </div>
+
+              <div className="social-icon viber">
+                <img src={vb} alt="Viber" />
+              </div>
+          </div>
+
+          <p className="footer-email">pifagor@gmail.com</p>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+</div>
+
+
+    </div>
+  );
+}
+
+
+export function ReviewsSlider({ reviewsData, StarsComponent }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handlePrev = () => {
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+  };
+
+  const handleNext = () => {
+    if (currentIndex < reviewsData.length - 1) setCurrentIndex(currentIndex + 1);
+  };
+
+  return (
+    <div className="reviews container" style={{ overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <h2 className="text-h1-unbounded" style={{ margin: 0 }}>Отзывы наших клиентов</h2>
+
+        <div style={{ display: "flex", gap: 12 }}>
+          <button
+            type="button"
+            onClick={handlePrev}
+            className={`slider-btn ${currentIndex === 0 ? "disabled" : ""}`}
+            disabled={currentIndex === 0}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            className={`slider-btn active ${currentIndex === reviewsData.length - 1 ? "disabled" : ""}`}
+            disabled={currentIndex === reviewsData.length - 1}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div className="slider-viewport">
+        <div
+          className="review-list"
+          style={{ transform: `translateX(-${currentIndex * 364}px)` }}
+        >
+          {reviewsData.map(r => (
             <div className="review" key={r.name}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                 <div className="text-body-lg" style={{
@@ -317,71 +452,13 @@ export default function PifagorHome() {
                   <div className="review-role">{r.role}</div>
                 </div>
               </div>
-              <Stars count={r.rating} />
+              {/* Используем переданный компонент звезд */}
+              <StarsComponent count={r.rating} />
               <p className="text-body">{r.text}</p>
             </div>
           ))}
         </div>
       </div>
-
-      <WaveDivider variant="footer" />
-
-      <div className="footer-wrap">
-        <footer className="footer">
-          <div className="container">
-
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, marginBottom: 36 }}>
-              <div>
-                <Logo variant="footer" />
-                <p className="footer-address text-body">
-                  ООО «Пифагор Центр», УНП 909100847<br />
-                  г. Минск, ул. Сурганова, д. 10<br />
-                  Режим работы пн–пт 10:00–20:00
-                </p>
-                <div style={{ display: "flex", gap: 8 }}>
-                  {["IG", "TG", "VB"].map(s => (
-                    <div key={s} className="text-body" style={{
-                      width: 34, height: 34, borderRadius: 8, background: "rgba(255,255,255,0.12)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      color: "rgba(255,255,255,0.7)", cursor: "pointer"
-                    }}>{s}</div>
-                  ))}
-                </div>
-              </div>
-
-              {[
-                { title: "Продукты", links: ["Репетиторы", "Цены", "Отзывы", "О нас"] },
-                { title: "Компания", links: ["Личный кабинет", "Блог", "Карьера"] },
-                { title: "Контакты", links: ["+375 44 793 38 70", "pifagor@gmail.com"] },
-              ].map(col => (
-                <div key={col.title}>
-                  <p className="footer-col-title text-body">{col.title}</p>
-                  {col.links.map(l => (
-                    <p key={l} className="footer-col-link text-body">{l}</p>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            <div style={{
-              background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
-              borderRadius: 16, padding: "22px 30px",
-              display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28
-            }}>
-              <div>
-                <p className="footer-cta-title text-body-lg">Приступите к занятиям сегодня</p>
-                <p className="footer-cta-sub text-body">Первое пробное занятие — бесплатно</p>
-              </div>
-              <button type="button" className="btn">Записаться →</button>
-            </div>
-
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 20, textAlign: "center" }}>
-              <p className="footer-copy">© 2024 Пифагор. Все права защищены.</p>
-            </div>
-          </div>
-        </footer>
-      </div>
-
     </div>
   );
 }
