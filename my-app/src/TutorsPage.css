@@ -1,0 +1,262 @@
+/* ── Banner (tutors variant) ── */
+
+.tutors-page-banner .banner::after {
+  background-image: none !important;
+  bottom: -60px;
+}
+
+.tutors-page-banner-form {
+  position: absolute;
+  left: 50%;
+  bottom: -35px;
+  transform: translateX(-50%);
+  z-index: 20;
+  width: min(700px, calc(100% - 32px));
+  min-height: 96px;
+  background: #fff;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 180px;
+  gap: 14px;
+  padding: 0 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  align-items: center;
+}
+
+.tutors-page-banner-form input {
+  height: 40px;
+  width: 100%;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-family: var(--font-futura);
+  font-size: var(--font-text-body);
+  color: #444;
+  background: #fff;
+  outline: none;
+}
+
+.tutors-page-banner-form input::placeholder {
+  color: #9ca3af;
+}
+
+.tutors-page-banner-form input:focus {
+  border-color: #2d5d8f;
+}
+
+.tutors-page-banner-form .banner-form-btn {
+  height: 45px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  font-family: var(--font-futura);
+  font-size: var(--text-body);
+  font-weight: 400;
+}
+
+.tutors-page-banner-form .banner-form-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.9);
+}
+
+/* ── Section header row ── */
+
+.tutors-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.tutors-page-filter-btn {
+  height: 38px;
+  padding: 0 20px;
+  border: 1.5px solid #dfe3e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.tutors-page-filter-btn:hover {
+  border-color: #1D809F;
+  color: #1D809F;
+}
+
+/* ── Tutors grid ── */
+
+.tutors-page-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ── Tutor card ── */
+
+.tutors-page-card {
+  background-color: #F4FAFC;
+  border-radius: 24px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  width: 353px;
+  min-width: 353px;
+  min-height: 454px;
+  height: auto;
+  padding-bottom: 24px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tutors-page-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(29, 128, 159, 0.12);
+}
+
+.tutors-page-card__photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.tutors-page-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tutors-page-card__name {
+  color: #1D476D;
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-align: left;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.tutors-page-card__title {
+  color: #40A8C5;
+  line-height: 1.4;
+  text-align: left;
+  white-space: pre-line;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* ── FAQ (inherits base faq-item from global, no overrides needed) ── */
+
+/* ── CTA join section ── */
+
+.tutors-page-cta {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding-top: 48px;
+  padding-bottom: 64px;
+  flex-wrap: wrap;
+}
+
+.tutors-page-cta__title {
+  /* text-h1-unbounded handles font */
+  white-space: pre-line;
+}
+
+.tutors-page-cta__arrow {
+  font-size: 48px;
+  color: #1D809F;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.tutors-page-cta__right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tutors-page-cta__label {
+  color: #1e293b;
+}
+
+.tutors-page-cta__form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tutors-page-cta__input {
+  height: 44px;
+  min-width: 280px;
+  border: 1.5px solid #dfe3e8;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-family: var(--font-futura);
+  font-size: var(--font-text-body);
+  color: #444;
+  background: #fff;
+  outline: none;
+}
+
+.tutors-page-cta__input:focus {
+  border-color: #1D809F;
+}
+
+.tutors-page-cta__form .banner-form-btn {
+  height: 44px;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 900px) {
+  .tutors-page-banner-form {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    min-height: auto;
+  }
+
+  .tutors-page-grid {
+    justify-content: center;
+  }
+
+  .tutors-page-card {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .tutors-page-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .tutors-page-cta__arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .tutors-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tutors-page-cta__input {
+    min-width: unset;
+    width: 100%;
+  }
+}
