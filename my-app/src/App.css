@@ -642,7 +642,7 @@
   overflow: hidden; /* Маска срезает длинный текст отзыва снизу */
 
   /* Точный цвет фона оригинального отзыва Яндекса */
-  background-color: #F5F8FC !important;
+  background-color: white;
 
   /* Картинка встает вплотную к краям, чтобы углы совпали */
   padding: 0 !important;

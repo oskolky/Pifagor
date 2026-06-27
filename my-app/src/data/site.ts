@@ -8,6 +8,8 @@ import icon3 from "../assets/main_page/price/time.png";
 import icon4 from "../assets/main_page/price/assess.png";
 import review1 from "../assets/reviews/review1.png";
 import review2 from "../assets/reviews/review2.png";
+import review3 from "../assets/reviews/review3.png";
+import review4 from "../assets/reviews/review4.png";
 import type { SubjectKey } from "../types/navigation";
 
 export interface SubjectCard {
@@ -61,7 +63,7 @@ export const PRICING_FEATURES = [
   { text: "Профессиональные репетиторы", icon: icon2 },
 ];
 
-export const REVIEW_IMAGES = [review1, review2];
+export const REVIEW_IMAGES = [review1, review2, review3, review4];
 
 export const CONTACT = {
   phone: "+375447933870",
