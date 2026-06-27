@@ -1,36 +1,63 @@
 import { useState } from "react";
-import { Logo } from './components/Logo';
-import { WaveDivider, ReviewsSlider } from './App';
-import waveImg from './assets/wave_bottom.svg';
-import icon1 from "./assets/main_page/price/check.png";
-import icon2 from "./assets/main_page/price/check2.png";
-import icon3 from "./assets/main_page/price/time.png";
-import icon4 from "./assets/main_page/price/assess.png";
-import tg from "./assets/tg.png";
-import vb from "./assets/vb.png";
-import inst from "./assets/inst.png";
+import { Logo } from "./components/Logo";
+import { Header } from "./components/Header";
+import { Footer } from "./components/Footer";
+import { WaveDivider } from "./components/WaveDivider";
+import { ReviewsSlider } from "./components/ReviewsSlider";
+import waveBlue from "./assets/wave_blue.svg";
+import alexeyPetrovImg from "./assets/Alexey Petrov.png";
+import homeImg from "./assets/homelander.png";
+import mathStatue from "./assets/main_page/math_statue.png";
+import engStatue from "./assets/main_page/eng_statue.png";
+import physicsStatue from "./assets/main_page/physics_statue.png";
+import chemStatue from "./assets/main_page/chem_statue.png";
+import chemistryBack from "./assets/chemistry_back.png";
+import { PRICING_FEATURES, REVIEW_IMAGES, SUBJECTS_NAV } from "./data/site";
+import { scrollToBookingForm } from "./utils/scroll";
+import type { PageKey, SubjectKey } from "./types/navigation";
+import "./SubjectPage.css";
 
-// ─── Subject config ──────────────────────────────────────────────────────────
+export type { SubjectKey };
 
-export type SubjectKey = "math" | "physics" | "english" | "chemistry";
+const CHEMISTRY_BANNER_DECOR: {
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  width: string;
+  rotate: number;
+  opacity: number;
+}[] = [
+  { top: "-8%", left: "-6%", width: "420px", rotate: -28, opacity: 0.22 },
+  { top: "12%", left: "18%", width: "360px", rotate: 42, opacity: 0.16 },
+  { top: "-5%", right: "8%", width: "390px", rotate: 75, opacity: 0.18 },
+  { top: "35%", right: "-4%", width: "480px", rotate: -55, opacity: 0.2 },
+  { bottom: "18%", left: "4%", width: "440px", rotate: 18, opacity: 0.17 },
+  { bottom: "8%", right: "22%", width: "320px", rotate: -90, opacity: 0.14 },
+  { top: "48%", left: "42%", width: "280px", rotate: 135, opacity: 0.12 },
+];
 
 interface SubjectConfig {
   title: string;
   subtitle: string;
-  accentColor: string;       // button / highlight colour
-  bgGradient: string;        // full banner background
-  bannerImage: string;       // statue / mascot image path
-  badgeText?: string;        // optional corner badge on banner image
+  accentColor: string;
+  bgGradient: string;
+  bannerImage: string;
+  imageStyle?: React.CSSProperties;
+  badgeText?: string;
   tutors: Tutor[];
   reviews: Review[];
   faqs: FAQ[];
+  titlePaddingTop?: number;
+  waveColor?: string;
 }
 
 interface Tutor {
   name: string;
   title: string;
-  avatarLetter: string;
-  avatarColor: string;
+  avatarLetter?: string;
+  avatarColor?: string;
+  image?: string;
 }
 
 interface Review {
@@ -45,29 +72,21 @@ interface FAQ {
   answer: string;
 }
 
-const PRICING_FEATURES = [
-  { text: "Индивидуальные занятия",      icon: icon1 },
-  { text: "Контроль прогресса",          icon: icon4 },
-  { text: "Гибкое расписание",           icon: icon3 },
-  { text: "Профессиональные репетиторы", icon: icon2 },
-];
-
-const NAV_MAIN      = ["Предметы", "Репетиторы", "Цены"];
-const NAV_SECONDARY = ["Отзывы", "Личный кабинет", "О нас"];
-
 // ─── Per-subject data ─────────────────────────────────────────────────────────
 
 const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
   math: {
     title: "Математика",
+    titlePaddingTop: 60,
     subtitle: "Unlock your potential in algebra, geometry, and calculus.",
-    accentColor: "#245985",
-    bgGradient: `radial-gradient(circle at 70% 80%, rgba(255,255,255,0.25) 10%, rgba(64,168,197,0.7) 30%, rgba(36,89,133,1) 60%), url('/src/assets/main_page/formulas0.4.png')`,
-    bannerImage: "/src/assets/main_page/main_statue.png",
+    accentColor: "#1D809F",
+    bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #AEE3F1 15%, #40A8C5 50%, #153E61 95%, #0D2942 100%)`,
+    bannerImage: mathStatue,
+    imageStyle: { bottom: -260, width: 'min(460px, 40vw)', right: -70 },
     tutors: [
-      { name: "Алексей Петров",  title: "МАП Олимп Совет",  avatarLetter: "А", avatarColor: "#245985" },
-      { name: "Алексей Петров",  title: "МАП Олимп Совет",  avatarLetter: "А", avatarColor: "#245985" },
-      { name: "Алексей Петров",  title: "Топ-5 Репетитор",  avatarLetter: "А", avatarColor: "#245985" },
+      { name: "Алексей Петров",  title: "Тренер математических олимпиад",  avatarLetter: "А", avatarColor: "#245985" },
+      { name: "Алексей Петров",  title: "Тренер математических олимпиад",  avatarLetter: "А", avatarColor: "#245985" },
+      { name: "Алексей Петров",  title: "Подготовил 10 стобалльников Учится в БГУ",  avatarLetter: "А", avatarColor: "#245985" },
     ],
     reviews: [
       { name: "Елена В.", role: "Мама одиннадцатиклассника", rating: 5, text: "Долго искали хорошего репетитора по математике. В Пифагоре нашли индивидуальный подход. Сын перестал бояться сложных задач и сдал экзамен на высокий балл." },
@@ -76,9 +95,9 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
       { name: "Оксана Р.", role: "Ученица",                  rating: 5, text: "Занималась математикой перед ЦТ. Репетитор объяснял очень понятно, всё разобрали по полочкам." },
     ],
     faqs: [
-      { question: "How long is a lesson?",        answer: "A standard lesson lasts 60 minutes, though we also offer extended 90-minute sessions depending on the student's needs and learning goals." },
-      { question: "Do I need my own materials?",  answer: "No — all necessary study materials and worksheets are provided by your tutor. You only need a notebook and a willingness to learn." },
-      { question: "Can I change my tutor?",       answer: "Yes, absolutely. If you feel the teaching style doesn't suit you perfectly, we'll match you with another specialist at no additional charge." },
+      { "question": "Сколько длится занятие?", "answer": "Стандартное занятие длится 60 минут, однако мы также предлагаем продленные 90-минутные сессии в зависимости от потребностей студента и целей обучения." },
+        { "question": "Нужны ли мне свои материалы?", "answer": "Нет — все необходимые учебные материалы и рабочие листы предоставляет ваш репетитор. Вам понадобятся только блокнот и желание учиться." },
+        { "question": "Могу ли я поменять репетитора?", "answer": "Да, безусловно. Если вы чувствуете, что стиль преподавания вам не совсем подходит, мы бесплатно подберем вам другого специалиста." }
     ],
   },
 
@@ -86,12 +105,15 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
     title: "Английский язык",
     subtitle: "Unlock your potential in algebra, geometry, and calculus.",
     accentColor: "#F9AB01",
-    bgGradient: `radial-gradient(circle at 70% 80%, rgba(255,255,255,0.25) 10%, rgba(249,171,1,0.65) 30%, rgba(180,110,0,1) 60%), url('/src/assets/main_page/formulas0.4.png')`,
-    bannerImage: "/src/assets/main_page/main_statue.png",
+    titlePaddingTop: 0 ,
+    waveColor: 'blue',
+    bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #FFF5D1 15%, #FFAE00 55%, #E69100 85%, #CC7A00 100%)`,
+    bannerImage: engStatue,
+    imageStyle: { bottom: -140, width: 'min(550px, 40vw)', right: -100 },
     badgeText: "Not open book!",
     tutors: [
-      { name: "Алексей Петров",  title: "МАП Олимп Совет",  avatarLetter: "А", avatarColor: "#F9AB01" },
-      { name: "Алексей Петров",  title: "МАП Олимп Совет",  avatarLetter: "А", avatarColor: "#F9AB01" },
+      { name: "Звёздочка",  title: "#Homelight",  avatarLetter: "А", avatarColor: "#F9AB01" },
+      { name: "Билли бутчер",  title: "Ои хьюи",  avatarLetter: "А", avatarColor: "#F9AB01" },
       { name: "Алексей Петров",  title: "Топ-5 Репетитор",  avatarLetter: "А", avatarColor: "#F9AB01" },
     ],
     reviews: [
@@ -101,21 +123,23 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
       { name: "Игорь",    role: "Ученик",           rating: 5, text: "Готовился к международному экзамену. Структурированный подход и реальная практика — именно то, что нужно." },
     ],
     faqs: [
-      { question: "How long is a lesson?",        answer: "A standard lesson lasts 60 minutes, though we also offer extended 90-minute sessions depending on the student's needs and learning goals." },
-      { question: "Do I need my own materials?",  answer: "No — all necessary study materials and worksheets are provided by your tutor. You only need a notebook and a willingness to learn." },
-      { question: "Can I change my tutor?",       answer: "Yes, absolutely. If you feel the teaching style doesn't suit you perfectly, we'll match you with another specialist at no additional charge." },
+      { "question": "Сколько длится занятие?", "answer": "Стандартное занятие длится 60 минут, однако мы также предлагаем продленные 90-минутные сессии в зависимости от потребностей студента и целей обучения." },
+        { "question": "Нужны ли мне свои материалы?", "answer": "Нет — все необходимые учебные материалы и рабочие листы предоставляет ваш репетитор. Вам понадобятся только блокнот и желание учиться." },
+        { "question": "Могу ли я поменять репетитора?", "answer": "Да, безусловно. Если вы чувствуете, что стиль преподавания вам не совсем подходит, мы бесплатно подберем вам другого специалиста." }
     ],
   },
 
   physics: {
     title: "Физика",
     subtitle: "Unlock your potential in algebra, geometry, and calculus.",
-    accentColor: "#40A8C5",
-    bgGradient: `radial-gradient(circle at 70% 80%, rgba(255,255,255,0.25) 10%, rgba(64,168,197,0.8) 30%, rgba(20,90,120,1) 60%), url('/src/assets/main_page/formulas0.4.png')`,
-    bannerImage: "/src/assets/main_page/main_statue.png",
+    accentColor: "#4FBED9",
+    waveColor: 'blue',
+    bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #E0F7FC 20%, #4FBED9 60%, #3098B5 85%, #207D99 100%)`,
+    bannerImage: physicsStatue,
+    imageStyle: { bottom: -200, width: 'min(550px, 40vw)', right: 80 },
     tutors: [
-      { name: "Алексей Смелый", title: "Старт Эксперт",    avatarLetter: "А", avatarColor: "#40A8C5" },
-      { name: "Алексей Петров", title: "МАП Олимп Совет",  avatarLetter: "А", avatarColor: "#40A8C5" },
+      { name: "Алексей Смелый", title: "Эксперт",    avatarLetter: "А", avatarColor: "#40A8C5" },
+     { name: "Джон Гиллман", title: "Я умнее, сильнее. Я лучше. Я лучше вас!",  image: homeImg },
       { name: "Алексей Петров", title: "Топ-5 Репетитор",  avatarLetter: "А", avatarColor: "#40A8C5" },
     ],
     reviews: [
@@ -124,19 +148,20 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
       { name: "Максим",   role: "Ученик",        rating: 5, text: "Задачи по механике казались невозможными, а теперь я решаю их сам. Большое спасибо!" },
       { name: "Татьяна",  role: "Мама ученицы",  rating: 5, text: "Результат превзошёл ожидания. Спасибо школе Пифагор за отличную организацию." },
     ],
-    faqs: [
-      { question: "How long is a lesson?",        answer: "A standard lesson lasts 60 minutes, though we also offer extended 90-minute sessions depending on the student's needs and learning goals." },
-      { question: "Do I need my own materials?",  answer: "No — all necessary study materials and worksheets are provided by your tutor. You only need a notebook and a willingness to learn." },
-      { question: "Can I change my tutor?",       answer: "Yes, absolutely. If you feel the teaching style doesn't suit you perfectly, we'll match you with another specialist at no additional charge." },
+   faqs: [
+      { "question": "Сколько длится занятие?", "answer": "Стандартное занятие длится 60 минут, однако мы также предлагаем продленные 90-минутные сессии в зависимости от потребностей студента и целей обучения." },
+        { "question": "Нужны ли мне свои материалы?", "answer": "Нет — все необходимые учебные материалы и рабочие листы предоставляет ваш репетитор. Вам понадобятся только блокнот и желание учиться." },
+        { "question": "Могу ли я поменять репетитора?", "answer": "Да, безусловно. Если вы чувствуете, что стиль преподавания вам не совсем подходит, мы бесплатно подберем вам другого специалиста." }
     ],
   },
 
   chemistry: {
     title: "Химия",
     subtitle: "Unlock your potential in algebra, geometry, and calculus.",
-    accentColor: "#23E2AF",
-    bgGradient: `radial-gradient(circle at 70% 80%, rgba(255,255,255,0.25) 10%, rgba(35,226,175,0.7) 30%, rgba(10,130,100,1) 60%), url('/src/assets/main_page/formulas0.4.png')`,
-    bannerImage: "/src/assets/main_page/main_statue.png",
+    accentColor: "#2AD4A7",
+    bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #D4F9E9 15%, #2AD4A7 55%, #1AB28B 85%, #119674 100%)`,
+    bannerImage: chemStatue,
+    imageStyle: { bottom: -190, width: 'min(590px, 40vw)', right: -20 },
     badgeText: "Химия",
     tutors: [
       { name: "Алексей Смелый", title: "Старт Эксперт",    avatarLetter: "А", avatarColor: "#23E2AF" },
@@ -149,60 +174,224 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
       { name: "Марина",   role: "Мама ученицы",     rating: 5, text: "Дочка мечтает о медицинском, химия была слабым местом. После Пифагора — уверенность и хороший балл." },
       { name: "Сергей",   role: "Ученик",           rating: 5, text: "Готовился к олимпиаде. Разбирали нестандартные задачи — именно это и помогло победить." },
     ],
-    faqs: [
-      { question: "How long is a lesson?",        answer: "A standard lesson lasts 60 minutes, though we also offer extended 90-minute sessions depending on the student's needs and learning goals." },
-      { question: "Do I need my own materials?",  answer: "No — all necessary study materials and worksheets are provided by your tutor. You only need a notebook and a willingness to learn." },
-      { question: "Can I change my tutor?",       answer: "Yes, absolutely. If you feel the teaching style doesn't suit you perfectly, we'll match you with another specialist at no additional charge." },
+   faqs: [
+      { "question": "Сколько длится занятие?", "answer": "Стандартное занятие длится 60 минут, однако мы также предлагаем продленные 90-минутные сессии в зависимости от потребностей студента и целей обучения." },
+        { "question": "Нужны ли мне свои материалы?", "answer": "Нет — все необходимые учебные материалы и рабочие листы предоставляет ваш репетитор. Вам понадобятся только блокнот и желание учиться." },
+        { "question": "Могу ли я поменять репетитора?", "answer": "Да, безусловно. Если вы чувствуете, что стиль преподавания вам не совсем подходит, мы бесплатно подберем вам другого специалиста." }
     ],
   },
 };
 
 // ─── Helper components ────────────────────────────────────────────────────────
 
-function Stars({ count = 5 }: { count?: number }) {
-  return (
-    <div className="stars">
-      {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="13" height="13" viewBox="0 0 13 13" fill="#F5A623">
-          <polygon points="6.5,1 8,5 12.5,5 9,8 10.5,12.5 6.5,9.5 2.5,12.5 4,8 0.5,5 5,5" />
-        </svg>
-      ))}
-    </div>
-  );
-}
+function TutorCard({ tutor, accentColor }: { tutor: Tutor; accentColor?: string }) {
 
-function TutorCard({ tutor }: { tutor: Tutor }) {
+  // Автоматический подбор мягкого пастельного фонда карточки в тон предмету
+  let cardBgColor = "#F4FAFC"; // Математика / Физика (Дефолт)
+  let nameColor = "#1D476D";    // ИСПРАВЛЕНО: Глубокий темно-синий для имени
+  let titleColor = "#40A8C5";   // ИСПРАВЛЕНО: Яркий бирюзовый для описания, как на макете
+
+  if (accentColor === "#F9AB01") { // Английский язык
+    cardBgColor = "#FFFDF5";
+    nameColor = "#8A5400";
+    titleColor = "#8C765C";
+  } else if (accentColor === "#23E2AF") { // Химия
+    cardBgColor = "#F2FAF7";
+    nameColor = "#167A60";
+    titleColor = "#5A857A";
+  }
+
   return (
-    <div className="tutor-card">
-      <div className="tutor-avatar" style={{ background: tutor.avatarColor + "22", color: tutor.avatarColor }}>
-        {tutor.avatarLetter}
+    <div
+      style={{
+        backgroundColor: cardBgColor,
+        borderRadius: "24px",
+        padding: "22px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        boxSizing: "border-box",
+        transition: "all 0.3s ease",
+
+        // ── ИСПРАВЛЕНО: Убираем жесткий height, чтобы текст не зажимался ──
+        width: "353px",
+        minWidth: "353px",
+        minHeight: "454px",        /* Минимальная высота по Figma */
+        height: "auto",            /* Если текста много, карточка плавно вырастет вниз */
+        paddingBottom: "24px",     /* Дополнительный нижний отступ для безопасности */
+        flexShrink: 0
+      }}
+    >
+      {/* Квадратный контейнер для картинки */}
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "1 / 1",
+          borderRadius: "16px",
+          overflow: "hidden",
+          marginBottom: "16px",
+          display: "block",
+          flexShrink: 0
+        }}
+      >
+        <img
+          src={tutor.image || alexeyPetrovImg}
+          alt={tutor.name}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block"
+          }}
+        />
       </div>
-      <div className="tutor-name text-body">{tutor.name}</div>
-      <div className="tutor-title">{tutor.title}</div>
+
+      {/* Блок с текстом */}
+      <div
+        style={{
+          paddingLeft: "4px",
+          paddingRight: "4px",
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
+        {/* Имя репетитора */}
+        <div
+          className="text-h2"
+          style={{
+            color: nameColor,
+            marginBottom: "8px",
+            fontWeight: 500,
+            textAlign: "left"
+          }}
+        >
+          {tutor.name}
+        </div>
+
+        {/* Описание / Регалии — теперь точно влезут все строки */}
+        <div
+          className="text-h3"
+          style={{
+            color: titleColor,
+            lineHeight: "1.4",
+            textAlign: "left",
+            whiteSpace: "pre-line"
+          }}
+        >
+          {tutor.title}
+        </div>
+      </div>
     </div>
   );
 }
 
-function FaqItem({ faq }: { faq: FAQ }) {
+// Добавили accentColor в параметры функции и в описание типов через двоеточие
+function FaqItem({ faq, accentColor }: { faq: FAQ; accentColor?: string }) {
   const [open, setOpen] = useState(false);
+
+  // 1. Определение цветов фона и текста в зависимости от предмета
+  let bgColor = "#F4FAFC";    // Математика / Физика (Дефолт)
+  let titleColor = "#1A547E";
+  let textColor = "#5A738E";
+  let iconColor = "#7994A6";
+
+  if (accentColor === "#F9AB01") { // Английский
+    bgColor = "#FFFDF5";
+    titleColor = "#8A5400";
+    textColor = "#8C765C";
+    iconColor = "#B38F54";
+  } else if (accentColor === "#23E2AF") { // Химия
+    bgColor = "#F2FAF7";
+    titleColor = "#167A60";
+    textColor = "#5A857A";
+    iconColor = "#63A391";
+  }
+
   return (
-    <div className={`faq-item ${open ? "faq-item--open" : ""}`}>
+    <div
+      style={{
+        backgroundColor: bgColor,
+        borderRadius: "12px",
+        marginBottom: "12px",
+        overflow: "hidden",
+        width: "100%",
+        display: "block",
+        boxSizing: "border-box"
+      }}
+    >
       <button
         type="button"
-        className="faq-question text-body"
         onClick={() => setOpen(!open)}
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: "100%",
+          height: "auto",
+          minHeight: "unset",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "24px 32px",
+          background: "none",
+          border: "none",
+          outline: "none",
+          textAlign: "left",
+          cursor: "pointer",
+          boxSizing: "border-box"
+        }}
       >
-        <span>{faq.question}</span>
+        <span
+          className="text-h2"
+          style={{
+            color: titleColor,
+            fontWeight: 400,
+            display: "inline-block",
+            width: "auto"
+          }}
+        >
+          {faq.question}
+        </span>
+
         <svg
           viewBox="0 0 24 24"
           fill="none"
-          className={`faq-icon ${open ? "faq-icon--open" : ""}`}
+          style={{
+            width: "20px",
+            height: "20px",
+            minWidth: "20px",
+            minHeight: "20px",
+            maxWidth: "20px",
+            maxHeight: "20px",
+            color: iconColor,
+            display: "block",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.3s ease",
+            boxSizing: "border-box"
+          }}
         >
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M6 9l6 6 6-6"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
+
       {open && (
-        <div className="faq-answer text-body">{faq.answer}</div>
+        <div
+          className="text-h3"
+          style={{
+            padding: "0 32px 24px 32px",
+            lineHeight: "1.5",
+            color: textColor,
+            width: "100%",
+            boxSizing: "border-box"
+          }}
+        >
+          {faq.answer}
+        </div>
       )}
     </div>
   );
@@ -213,101 +402,153 @@ function FaqItem({ faq }: { faq: FAQ }) {
 interface SubjectPageProps {
   subject: SubjectKey;
   onBack: () => void;
+  onNavigate: (key: PageKey) => void;
 }
 
-export default function SubjectPage({ subject, onBack }: SubjectPageProps) {
+export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPageProps) {
   const cfg = SUBJECT_CONFIGS[subject];
-  const [name,  setName]  = useState("");
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [formSubject, setFormSubject] = useState(SUBJECT_CONFIGS[subject].title);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
 
   return (
     <div className="app">
-
-      {/* ── Header ── */}
-      <header className="header">
-        <a href="#" className="header-logo-link" onClick={(e) => { e.preventDefault(); onBack(); }}>
-          <Logo />
-        </a>
-        <nav className="header-nav-main">
-          {NAV_MAIN.map(l => (
-            <a key={l} href="#" className="text-h3">{l}</a>
-          ))}
-        </nav>
-        <div className="header-right">
-          <nav className="header-nav-secondary">
-            {NAV_SECONDARY.map(l => (
-              <a key={l} href="#" className="text-h3">{l}</a>
-            ))}
-          </nav>
-          <a href="tel:+375447933870" className="header-phone text-h3">+375 44 793 38 70</a>
-        </div>
-      </header>
+      <Header
+        currentSubject={subject}
+        onHome={onBack}
+        onNavigate={onNavigate}
+      />
 
       {/* ── Banner ── */}
       <section
-        className="banner subject-banner"
-        style={{
-          backgroundImage: cfg.bgGradient,
-          backgroundSize: "cover, 60%",
-          backgroundPosition: "center, right center",
-          backgroundRepeat: "no-repeat, repeat",
-        }}
+          className="banner subject-banner"
+          style={{
+            backgroundImage: cfg.bgGradient,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
       >
+        {subject === "chemistry" && (
+          <div className="subject-banner__decor" aria-hidden="true">
+            {CHEMISTRY_BANNER_DECOR.map((item, index) => (
+              <img
+                key={index}
+                src={chemistryBack}
+                alt=""
+                className="subject-banner__decor-item"
+                style={{
+                  top: item.top,
+                  left: item.left,
+                  right: item.right,
+                  bottom: item.bottom,
+                  width: item.width,
+                  opacity: item.opacity,
+                  transform: `rotate(${item.rotate}deg)`,
+                }}
+              />
+            ))}
+          </div>
+        )}
         <div className="banner-inner">
           <div className="banner-content">
-            <h1 className="banner-title text-display-unbounded">{cfg.title}</h1>
-            <p className="banner-subtitle text-h1-futura">{cfg.subtitle}</p>
+            <h1 className="banner-title text-display-unbounded" style={{ maxWidth: 500,  paddingTop: cfg.titlePaddingTop ?? 60  }}>{cfg.title}</h1>
+            <p className="banner-subtitle text-h1-futura" style={{ maxWidth: 700, paddingTop:20 }}>{cfg.subtitle}</p>
           </div>
-          <img src={cfg.bannerImage} alt="" className="banner-image" />
+          <img src={cfg.bannerImage} alt="" className="banner-image banner-image--subject" style={cfg.imageStyle} />
         </div>
 
-        {/* simple 2-field sign-up strip */}
-        <div className="subject-banner-form">
+        <form id="top-booking-form" className="banner-form" onSubmit={e => e.preventDefault()}>
           <div className="banner-form-info">
             <div className="banner-form-small">Не уверены в знаниях?</div>
             <div className="banner-form-big">Запишитесь на пробное!</div>
           </div>
+
           <input
             type="text"
             placeholder="Имя родителя"
             value={name}
             onChange={e => setName(e.target.value)}
           />
+
           <input
             type="tel"
             placeholder="Номер телефона"
             value={phone}
             onChange={e => setPhone(e.target.value)}
           />
-          <button
-            type="button"
-            className="banner-form-btn"
-            style={{ background: cfg.accentColor === "#23E2AF" ? "#1ab894" : cfg.accentColor }}
-          >
+
+          <div className="select-wrapper">
+            <div
+              className={`select-trigger${!formSubject ? " placeholder" : ""}`}
+              onClick={() => setIsSelectOpen(!isSelectOpen)}
+            >
+              <span>{formSubject || "Предмет"}</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className={`select-arrow-icon${isSelectOpen ? " is-open" : ""}`}
+              >
+                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            {isSelectOpen && (
+              <div className="select-dropdown">
+                {SUBJECTS_NAV.map(s => (
+                  <div
+                    key={s.key}
+                    className={`select-option${formSubject === SUBJECT_CONFIGS[s.key].title ? " selected" : ""}`}
+                    onClick={() => { setFormSubject(SUBJECT_CONFIGS[s.key].title); setIsSelectOpen(false); }}
+                  >
+                    {SUBJECT_CONFIGS[s.key].title}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button type="submit" className="banner-form-btn">
             Записаться
           </button>
-        </div>
+        </form>
       </section>
 
-      <WaveDivider variant="banner" />
+      <WaveDivider variant="banner" src={cfg.waveColor === "blue" ? waveBlue : undefined} />
 
-      {/* ── Tutors ── */}
-      <div className="container" style={{ paddingTop: 48 }}>
-        <h2 className="section-title text-h1-unbounded" style={{ paddingTop: 8, marginBottom: 32 }}>
-          Наши репетиторы
-        </h2>
-        <div className="tutors-grid">
+    <div className="container" style={{ paddingTop: 100 }}>
+      <h2 className="section-title text-h1-unbounded" style={{ paddingTop: 8, marginBottom: 32, textAlign: 'left' }}>
+        Наши репетиторы
+      </h2>
+
+      {/* 2. Центрируем ТОЛЬКО этот внутренний контейнер с карточками */}
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <div
+          className="tutors-grid"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center', /* Центрирует 3 карточки внутри доступной ширины */
+            alignItems: 'stretch',
+            gap: '30px',
+            width: '100%',
+            maxWidth: '1120px', /* Делает ширину сетки точно такой же, как форма сверху */
+            flexWrap: 'wrap'
+          }}
+        >
           {cfg.tutors.map((t, i) => (
-            <TutorCard key={i} tutor={t} />
+            <TutorCard key={i} tutor={t} accentColor={cfg.accentColor} />
           ))}
         </div>
       </div>
+    </div>
 
       {/* ── Reviews ── */}
-      <div style={{ marginTop: 48 }}>
-        <ReviewsSlider reviewsData={cfg.reviews} StarsComponent={Stars} />
+      <div id="reviews">
+        <div style={{ marginTop: 48 }}>
+          <ReviewsSlider reviewsData={REVIEW_IMAGES} />
+        </div>
       </div>
-
       {/* ── Pricing ── */}
       <div className="container">
         <h2 className="section-title section-title--compact text-h1-unbounded" style={{ marginBottom: -40, paddingTop: 40 }}>
@@ -315,7 +556,7 @@ export default function SubjectPage({ subject, onBack }: SubjectPageProps) {
         </h2>
       </div>
 
-      <div className="price-section container">
+      <div id="prices" className="price-section container">
         <div className="price-box">
           <div className="price-left">
             <h2 className="text-h1-futura">Стоимость одного занятия</h2>
@@ -335,10 +576,11 @@ export default function SubjectPage({ subject, onBack }: SubjectPageProps) {
                 type="button"
                 className="price-btn price-btn--primary"
                 style={{ background: cfg.accentColor === "#23E2AF" ? "#1ab894" : cfg.accentColor }}
+                onClick={scrollToBookingForm}
               >
                 Оставить заявку
               </button>
-              <button type="button" className="price-btn price-btn--outline">
+              <button type="button" className="price-btn price-btn--outline" onClick={scrollToBookingForm}>
                 Хочу дешевле!
               </button>
             </div>
@@ -347,7 +589,14 @@ export default function SubjectPage({ subject, onBack }: SubjectPageProps) {
           <div
             className="price-right"
             style={{
-              background: `radial-gradient(circle at center, rgba(255,255,255,0.25) 0%, ${cfg.accentColor} 50%, ${cfg.accentColor === "#F9AB01" ? "#a06c00" : cfg.accentColor === "#23E2AF" ? "#0a8264" : "#245985"} 100%)`,
+              background: `radial-gradient(circle at center, rgba(255, 255, 255, 0.35) 0%, ${cfg.accentColor} 80%, ${
+                  cfg.accentColor === "#F9AB01" ? "#E69100" : // Английский (Строго свой край)
+                  cfg.accentColor === "#23E2AF" ? "#B6F3E1" : // Химия (Строго свой край)
+                  cfg.accentColor === "#4FBED9" ? "#2B8CA6" : // Физика (Строго свой край)
+                  cfg.accentColor === "#40A8C5" ? "#2087A3" : // МАТЕМАТИКА (Теперь изолирована и влияет ТОЛЬКО на себя!)
+                  cfg.accentColor                             // Любой другой новый предмет будет просто плавно уходить в свой же цвет
+              } 100%)`
+
             }}
           >
             <div className="price-right-inner">
@@ -360,63 +609,21 @@ export default function SubjectPage({ subject, onBack }: SubjectPageProps) {
         </div>
       </div>
 
-      {/* ── FAQ ── */}
-      <div className="container" style={{ paddingBottom: 64 }}>
-        <h2 className="section-title text-h1-unbounded" style={{ marginBottom: 24 }}>
-          Часто задаваемые вопросы
-        </h2>
-        <div className="faq-list">
-          {cfg.faqs.map((faq, i) => (
-            <FaqItem key={i} faq={faq} />
-          ))}
-        </div>
+    {/* ── FAQ ── */}
+    <div className="container" style={{ paddingBottom: 64 }}>
+      <h2 className="section-title text-h1-unbounded" style={{ marginBottom: 24 }}>
+        Часто задаваемые вопросы
+      </h2>
+      <div className="faq-list" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {cfg.faqs.map((faq, i) => (
+          // Добавили проп accentColor
+          <FaqItem key={i} faq={faq} accentColor={cfg.accentColor} />
+        ))}
       </div>
+    </div>
 
-      <WaveDivider variant="footer" />
-
-      {/* ── Footer ── */}
-      <div className="footer-wrap">
-        <footer className="footer">
-          <div className="container footer-grid">
-            <div className="footer-info-col">
-              <div className="footer-logo-box">
-                <Logo variant="footer" />
-              </div>
-              <p className="footer-address text-h3">
-                ООО «Пифагор Центр», УНП 193900047<br />
-                Юридический адрес: 220019 г. Минск,<br />
-                ул. Сухаревская, д. 16<br />
-                Свидетельство регистрации от 20.08.2025,<br />
-                выдано Минским горисполкомом<br />
-                Режим работы: пн–пт 10:00–20:00
-              </p>
-            </div>
-            <div className="footer-menu-col">
-              <p className="footer-link" onClick={onBack} style={{ cursor: "pointer" }}>Предметы</p>
-              <p className="footer-link">Репетиторы</p>
-              <p className="footer-link">Цены</p>
-              <p className="footer-link">Отзывы</p>
-              <p className="footer-link">Личный кабинет</p>
-              <p className="footer-link">О нас</p>
-            </div>
-            <div className="footer-actions-col">
-              <button type="button" className="footer-cta-btn">
-                Присоединиться к занятиям
-              </button>
-              <div className="footer-social-box">
-                <p className="footer-social-title">Хочешь узнать больше?<br />Напиши нам!</p>
-                <div className="footer-social-icons">
-                  <div className="social-icon instagram"><img src={inst} alt="Instagram" /></div>
-                  <div className="social-icon telegram"><img src={tg} alt="Telegram" /></div>
-                  <div className="social-icon viber"><img src={vb} alt="Viber" /></div>
-                </div>
-                <p className="footer-email">pifagor@gmail.com</p>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </div>
-
+    <WaveDivider variant="footer" />
+    <Footer onHome={onBack} onNavigate={onNavigate} />
     </div>
   );
 }

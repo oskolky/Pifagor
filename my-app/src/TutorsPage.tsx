@@ -1,18 +1,18 @@
 import { useState } from "react";
+import "./App.css";
+import "./TutorsPage.css";
+import { Header } from "./components/Header";
+import { Footer } from "./components/Footer";
+import { WaveDivider } from "./components/WaveDivider";
+import { ReviewsSlider } from "./components/ReviewsSlider";
 import { Logo } from "./components/Logo";
-import { WaveDivider, ReviewsSlider } from "./App";
-import waveImg from "./assets/wave_bottom.svg";
-import icon1 from "./assets/main_page/price/check.png";
-import icon2 from "./assets/main_page/price/check2.png";
-import icon3 from "./assets/main_page/price/time.png";
-import icon4 from "./assets/main_page/price/assess.png";
-import tg from "./assets/tg.png";
-import vb from "./assets/vb.png";
-import inst from "./assets/inst.png";
 import alexeyPetrovImg from "./assets/Alexey Petrov.png";
-import review1 from "./assets/reviews/review1.png";
-import review2 from "./assets/reviews/review2.png";
-import statueImg from "./assets/main_page/math_statue.png";
+import tutorsBannerImg from "./assets/tutors.png";
+import arrowIcon from "./assets/Arrow.svg";
+import selectSvg from "./assets/select.svg";
+import { PRICING_FEATURES, REVIEW_IMAGES, SUBJECTS } from "./data/site";
+import { scrollToBookingForm } from "./utils/scroll";
+import type { PageKey } from "./types/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,13 +23,6 @@ interface Tutor {
   avatarLetter?: string;
 }
 
-interface Review {
-  name: string;
-  role: string;
-  rating: number;
-  text: string;
-}
-
 interface FAQ {
   question: string;
   answer: string;
@@ -37,7 +30,7 @@ interface FAQ {
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
-const REVIEWS_IMAGES = [review1, review2];
+const TUTOR_SUBJECTS = SUBJECTS.map(({ title }) => ({ title }));
 
 const TUTORS: Tutor[] = [
   { name: "Алексей Петров",  title: "Math Diamond Coach",        image: alexeyPetrovImg },
@@ -45,42 +38,13 @@ const TUTORS: Tutor[] = [
   { name: "Алексей Петров",  title: "Math Diamond Coach. 10 стобалльников. Учится в БГУ.", image: alexeyPetrovImg },
 ];
 
-const REVIEWS: Review[] = [
-  { name: "Елена В.",  role: "Мама одиннадцатиклассника", rating: 5, text: "Долго искали хорошего репетитора по математике. В Пифагоре нашли индивидуальный подход. Сын перестал бояться сложных задач и сдал экзамен на высокий балл." },
-  { name: "Максим",    role: "Ученик",                    rating: 5, text: "Занимался онлайн. Интерактивная доска и разборы домашних заданий оказались даже удобнее обычных уроков." },
-  { name: "Ольга К.",  role: "Мама ученика",              rating: 5, text: "Сын занимался в Пифагоре, очень доволен. Оценки подтянулись, сдал экзамен отлично." },
-  { name: "Оксана Р.", role: "Ученица",                   rating: 5, text: "Занималась математикой перед ЦТ. Репетитор объяснял очень понятно, всё разобрали по полочкам." },
-];
-
 const FAQS: FAQ[] = [
-  { question: "How long is a lesson?",       answer: "A standard lesson lasts 60 minutes, though we can offer up to 45 or 90 minutes depending on the student's immediate goals and pace." },
-  { question: "Do I need my own material?",  answer: "We provide comprehensive digital worksheets and resources sets. All you need to enable is a tablet." },
-  { question: "Can I change my tutor?",      answer: "You are always welcome to switch. If you find a better match, just contact our team and we'll help you find the perfect fit, no fee." },
-];
-
-const PRICING_FEATURES = [
-  { text: "Индивидуальные занятия",      icon: icon1 },
-  { text: "Контроль прогресса",          icon: icon4 },
-  { text: "Гибкое расписание",           icon: icon3 },
-  { text: "Профессиональные репетиторы", icon: icon2 },
-];
-
-const NAV_MAIN      = ["Предметы", "Репетиторы", "Цены"];
-const NAV_SECONDARY = ["Отзывы", "Личный кабинет", "О нас"];
+      { "question": "Сколько длится занятие?", "answer": "Стандартное занятие длится 60 минут, однако мы также предлагаем продленные 90-минутные сессии в зависимости от потребностей студента и целей обучения." },
+        { "question": "Нужны ли мне свои материалы?", "answer": "Нет — все необходимые учебные материалы и рабочие листы предоставляет ваш репетитор. Вам понадобятся только блокнот и желание учиться." },
+        { "question": "Могу ли я поменять репетитора?", "answer": "Да, безусловно. Если вы чувствуете, что стиль преподавания вам не совсем подходит, мы бесплатно подберем вам другого специалиста." }
+    ];
 
 // ─── Helper components ────────────────────────────────────────────────────────
-
-function Stars({ count = 5 }: { count?: number }) {
-  return (
-    <div className="stars">
-      {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="13" height="13" viewBox="0 0 13 13" fill="#F5A623">
-          <polygon points="6.5,1 8,5 12.5,5 9,8 10.5,12.5 6.5,9.5 2.5,12.5 4,8 0.5,5 5,5" />
-        </svg>
-      ))}
-    </div>
-  );
-}
 
 function TutorCard({ tutor }: { tutor: Tutor }) {
   return (
@@ -97,26 +61,112 @@ function TutorCard({ tutor }: { tutor: Tutor }) {
   );
 }
 
-function FaqItem({ faq }: { faq: FAQ }) {
+function FaqItem({ faq, accentColor }: { faq: FAQ; accentColor?: string }) {
   const [open, setOpen] = useState(false);
+
+  // 1. Определение цветов фона и текста в зависимости от предмета
+  let bgColor = "#F4FAFC";    // Математика / Физика (Дефолт)
+  let titleColor = "#1A547E";
+  let textColor = "#5A738E";
+  let iconColor = "#7994A6";
+
+  if (accentColor === "#F9AB01") { // Английский
+    bgColor = "#FFFDF5";
+    titleColor = "#8A5400";
+    textColor = "#8C765C";
+    iconColor = "#B38F54";
+  } else if (accentColor === "#23E2AF") { // Химия
+    bgColor = "#F2FAF7";
+    titleColor = "#167A60";
+    textColor = "#5A857A";
+    iconColor = "#63A391";
+  }
+
   return (
-    <div className="faq-item">
+    <div
+      style={{
+        backgroundColor: bgColor,
+        borderRadius: "12px",
+        marginBottom: "12px",
+        overflow: "hidden",
+        width: "100%",
+        display: "block",
+        boxSizing: "border-box"
+      }}
+    >
       <button
         type="button"
-        className="faq-question"
         onClick={() => setOpen(!open)}
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: "100%",
+          height: "auto",
+          minHeight: "unset",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "24px 32px",
+          background: "none",
+          border: "none",
+          outline: "none",
+          textAlign: "left",
+          cursor: "pointer",
+          boxSizing: "border-box"
+        }}
       >
-        <span>{faq.question}</span>
+        <span
+          className="text-h2"
+          style={{
+            color: titleColor,
+            fontWeight: 400,
+            display: "inline-block",
+            width: "auto"
+          }}
+        >
+          {faq.question}
+        </span>
+
         <svg
           viewBox="0 0 24 24"
           fill="none"
-          className={`faq-icon${open ? " faq-icon--open" : ""}`}
+          style={{
+            width: "20px",
+            height: "20px",
+            minWidth: "20px",
+            minHeight: "20px",
+            maxWidth: "20px",
+            maxHeight: "20px",
+            color: iconColor,
+            display: "block",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.3s ease",
+            boxSizing: "border-box"
+          }}
         >
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M6 9l6 6 6-6"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
+
       {open && (
-        <div className="faq-answer text-h3">{faq.answer}</div>
+        <div
+          className="text-h3"
+          style={{
+            padding: "0 32px 24px 32px",
+            lineHeight: "1.5",
+            color: textColor,
+            width: "100%",
+            boxSizing: "border-box"
+          }}
+        >
+          {faq.answer}
+        </div>
       )}
     </div>
   );
@@ -126,113 +176,138 @@ function FaqItem({ faq }: { faq: FAQ }) {
 
 interface TutorsPageProps {
   onBack: () => void;
+  onNavigate: (page: PageKey) => void;
 }
 
-export default function TutorsPage({ onBack }: TutorsPageProps) {
-  const [name,          setName]          = useState("");
-  const [phone,         setPhone]         = useState("");
-  const [subjectsOpen,  setSubjectsOpen]  = useState(false);
+export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
+  const [name, setName] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [subject, setSubject] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("Английский язык");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const [tutorName, setTutorName] = useState('');
+  const [tutorPhone, setTutorPhone] = useState('');
+  const [tutorSubject, setTutorSubject] = useState('');
+  const [isTutorDropdownOpen, setIsTutorDropdownOpen] = useState(false);
+
 
   return (
     <div className="app">
+      <Header currentPage="tutors" onHome={onBack} onNavigate={onNavigate} />
 
-      {/* ── Header ── */}
-      <header className="header">
-        <a href="#" className="header-logo-link" onClick={(e) => { e.preventDefault(); onBack(); }}>
-          <Logo />
-        </a>
-        <nav className="header-nav-main">
-          <div className="header-dropdown">
-            <a
-              href="#"
-              className="text-h3"
-              onClick={(e) => { e.preventDefault(); setSubjectsOpen(!subjectsOpen); }}
+      <div className="tutors-banner-wrap">
+        <section className="banner tutors-banner">
+          <div className="banner-inner">
+            <div className="banner-content">
+              <h1 className="banner-title text-display-unbounded">Репетиторы</h1>
+              <p className="banner-subtitle text-h1-futura">
+                Поможем подтянуть оценки, подготовиться к ЦЭ и ЦТ
+              </p>
+            </div>
+
+            <img src={tutorsBannerImg} alt="" className="banner-image banner-image--tutors" />
+          </div>
+
+          <form id="top-booking-form" className="banner-form" onSubmit={e => e.preventDefault()}>
+            <div className="banner-form-info">
+              <div className="banner-form-small">Не уверены в знаниях?</div>
+              <div className="banner-form-big">Запишитесь на пробное!</div>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Имя родителя"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+
+            <input
+              type="tel"
+              placeholder="Номер телефона"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+            />
+
+            <div className="select-wrapper">
+              <div
+                className={`select-trigger ${!subject ? "placeholder" : ""}`}
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                <span>{subject || "Предмет"}</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className={`select-arrow-icon ${isOpen ? "is-open" : ""}`}
+                >
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+
+              {isOpen && (
+                <div className="select-dropdown">
+                  {SUBJECTS.map(s => (
+                    <div
+                      key={s.title}
+                      className={`select-option ${subject === s.title ? "selected" : ""}`}
+                      onClick={() => { setSubject(s.title); setIsOpen(false); }}
+                    >
+                      {s.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button type="submit" className="banner-form-btn">
+              Записаться
+            </button>
+          </form>
+        </section>
+
+        <WaveDivider variant="banner" />
+      </div>
+
+      {/* ── Tutors grid ── */}
+      <div className="container" style={{ paddingTop: 0 }}>
+        <div className="tutors-page-header">
+          <h2 className="section-title text-h1-unbounded">Наши репетиторы</h2>
+
+          <div className="tutors-page-filter-wrapper">
+            <button
+              type="button"
+              className={`tutors-page-filter-btn text-h3 ${isDropdownOpen ? "is-open" : ""}`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              aria-expanded={isDropdownOpen}
+              aria-haspopup="listbox"
             >
-              Предметы
-            </a>
-            {subjectsOpen && (
-              <div className="header-dropdown-menu">
-                {["Математика", "Физика", "Английский язык", "Химия"].map(s => (
-                  <a key={s} href="#" className="header-dropdown-item">{s}</a>
+              <span>{selectedSubject}</span>
+              <img src={selectSvg} alt="" className="filter-arrow-icon" />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="tutors-page-filter-dropdown" role="listbox">
+                {TUTOR_SUBJECTS.map((subj) => (
+                  <button
+                    key={subj.title}
+                    type="button"
+                    role="option"
+                    aria-selected={selectedSubject === subj.title}
+                    className={`tutors-page-filter-option text-h3 ${
+                      selectedSubject === subj.title ? "selected" : ""
+                    }`}
+                    onClick={() => {
+                      setSelectedSubject(subj.title);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    {subj.title}
+                  </button>
                 ))}
               </div>
             )}
           </div>
-          {NAV_MAIN.slice(1).map(l => (
-            <a key={l} href={l === "Цены" ? "#prices" : "#"} className="text-h3">{l}</a>
-          ))}
-        </nav>
-        <div className="header-right">
-          <nav className="header-nav-secondary">
-            {NAV_SECONDARY.map(l => (
-              <a
-                key={l}
-                href={l === "Отзывы" ? "#reviews" : l === "О нас" ? "#about" : "#"}
-                className="text-h3"
-              >
-                {l}
-              </a>
-            ))}
-          </nav>
-          <a href="tel:+375447933870" className="header-phone text-h3">+375 44 793 38 70</a>
-        </div>
-      </header>
-
-      {/* ── Banner ── */}
-      <section
-        className="banner tutors-page-banner"
-        style={{
-          backgroundImage: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #AEE3F1 15%, #40A8C5 50%, #153E61 95%, #0D2942 100%)`,
-        }}
-      >
-        <div className="banner-inner">
-          <div className="banner-content">
-            <h1 className="banner-title text-display-unbounded" style={{ paddingTop: 60 }}>
-              Репетиторы
-            </h1>
-            <p className="banner-subtitle text-h1-futura" style={{ paddingTop: 20 }}>
-              Unlock your potential in<br />algebra, geometry, and calculus.
-            </p>
-          </div>
-          <img
-            src={statueImg}
-            alt=""
-            className="banner-image banner-image--subject"
-            style={{ bottom: -260, width: "min(460px, 40vw)", right: -70 }}
-          />
-        </div>
-
-        {/* Форма */}
-        <form className="tutors-page-banner-form" onSubmit={e => e.preventDefault()}>
-          <input
-            type="text"
-            placeholder="Имя родителя"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-          <input
-            type="tel"
-            placeholder="Номер телефона"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
-          />
-          <button type="submit" className="banner-form-btn" style={{ background: "#1D809F" }}>
-            Записаться на пробное
-          </button>
-        </form>
-      </section>
-
-      <div className="wave-divider wave-divider--banner" aria-hidden="true">
-        <img src={waveImg} alt="" />
-      </div>
-
-      {/* ── Tutors grid ── */}
-      <div className="container" style={{ paddingTop: 100 }}>
-        <div className="tutors-page-header">
-          <h2 className="section-title text-h1-unbounded">Наши репетиторы</h2>
-          <button type="button" className="tutors-page-filter-btn text-h3">
-            Фильтровать ▾
-          </button>
         </div>
 
         <div className="tutors-page-grid">
@@ -244,7 +319,7 @@ export default function TutorsPage({ onBack }: TutorsPageProps) {
 
       {/* ── Reviews ── */}
       <div id="reviews" style={{ marginTop: 48 }}>
-        <ReviewsSlider reviewsData={REVIEWS_IMAGES} StarsComponent={Stars} />
+        <ReviewsSlider reviewsData={REVIEW_IMAGES} />
       </div>
 
       {/* ── Pricing ── */}
@@ -273,10 +348,15 @@ export default function TutorsPage({ onBack }: TutorsPageProps) {
               ))}
             </div>
             <div className="price-buttons">
-              <button type="button" className="price-btn price-btn--primary" style={{ background: "#1D809F" }}>
+              <button
+                type="button"
+                className="price-btn price-btn--primary"
+                style={{ background: "#1D809F" }}
+                onClick={scrollToBookingForm}
+              >
                 Оставить заявку
               </button>
-              <button type="button" className="price-btn price-btn--outline">
+              <button type="button" className="price-btn price-btn--outline" onClick={scrollToBookingForm}>
                 Хочу дешевле!
               </button>
             </div>
@@ -311,69 +391,198 @@ export default function TutorsPage({ onBack }: TutorsPageProps) {
       </div>
 
       {/* ── CTA Join ── */}
-      <section className="tutors-page-cta container">
-        <h2 className="tutors-page-cta__title text-h1-unbounded">
-          Хотите<br />присоединиться<br />в команду?
-        </h2>
-        <div className="tutors-page-cta__arrow">→</div>
-        <div className="tutors-page-cta__right">
-          <div className="tutors-page-cta__label text-h2">Делайте!</div>
-          <form className="tutors-page-cta__form" onSubmit={e => e.preventDefault()}>
-            <input type="text" placeholder="Мне интересно стать репетитором" className="tutors-page-cta__input" />
-            <button type="submit" className="banner-form-btn" style={{ background: "#1D809F", minWidth: 140 }}>
-              Отправить
-            </button>
-          </form>
-        </div>
-      </section>
+<section style={{ display: 'flex', flexDirection: 'column', gap: '30px', width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '0 20px', boxSizing: 'border-box' }}>
+
+  {/* Верхняя строка: Заголовок, Стрелка и Делайте строго в один ряд */}
+  <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <h2 className="text-h1-unbounded" style={{ margin: 0, padding: 0, lineHeight: '1.2' }}>
+      Хотите<br />присоединиться<br />в команду?
+    </h2>
+
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1 }}>
+      <img src={arrowIcon} alt="Стрелка" style={{ maxWidth: '100px', width: '100%', height: 'auto', display: 'block' }} />
+    </div>
+
+    <div className="text-h1-unbounded" style={{ margin: 0, padding: 0, whiteSpace: 'nowrap' }}>
+      Делайте!
+    </div>
+  </div>
+
+  {/* Нижняя строка: Аккуратная белая карточка-форма в одну линию */}
+  <form
+    onSubmit={e => e.preventDefault()}
+    style={{
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      background: '#ffffff',
+      padding: '20px 30px',
+      borderRadius: '16px',
+      boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.06)',
+      gap: '20px',
+      width: 'min(980px, calc(100% - 32px))',
+      minHeight: '112px',
+      boxSizing: 'border-box'
+    }}
+  >
+    {/* Левый блок с текстом */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0, minWidth: '180px' }}>
+      <div style={{ fontSize: '20px', fontFamily: "Futura PT", color: '#8c97a6', marginBottom: '4px', marginLeft: '0px' }}>Уверены в своих знаниях?</div>
+      <div style={{ fontSize: "24px", fontFamily: "Futura PT", color: "#111827", lineHeight: 1 }}>
+        Мы ждем именно Вас!
+      </div>
+    </div>
+
+    {/* Поля ввода */}
+    <input
+  type="text"
+  placeholder="Ваше имя"
+  value={tutorName}
+  onChange={e => setTutorName(e.target.value)}
+  style={{
+    height: '40px',
+    width: '100%',
+    border: '1px solid #dfe3e8',
+    borderRadius: '8px',
+    padding: '0 16px',
+    fontFamily: 'var(--font-futura)',
+    fontSize: 'var(--font-text-body)',
+    color: '#444',
+    background: '#fff',
+    outline: 'none',
+    boxSizing: 'border-box'
+  }}
+/>
+
+<input
+  type="tel"
+  placeholder="Номер телефона"
+  value={tutorPhone}
+  onChange={e => setTutorPhone(e.target.value)}
+  style={{
+    height: '40px',
+    width: '100%',
+    border: '1px solid #dfe3e8',
+    borderRadius: '8px',
+    padding: '0 16px',
+    fontFamily: 'var(--font-futura)',
+    fontSize: 'var(--font-text-body)',
+    color: '#444',
+    background: '#fff',
+    outline: 'none',
+    boxSizing: 'border-box'
+  }}
+/>
+
+{/* Кастомный селект */}
+<div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
+  <div
+    className={`select-trigger ${!tutorSubject ? "placeholder" : ""}`}
+    onClick={() => setIsTutorDropdownOpen(!isTutorDropdownOpen)}
+    style={{
+      height: '40px',
+      width: '100%',
+      border: '1px solid #dfe3e8',
+      borderRadius: '8px',
+      padding: '0 16px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      background: '#fff',
+      cursor: 'pointer',
+      boxSizing: 'border-box',
+      fontFamily: 'var(--font-futura)',
+      fontSize: 'var(--font-text-body)',
+      color: '#444'
+    }}
+  >
+    <span style={{ color: !tutorSubject ? '#9ca3af' : '#444' }}>
+      {tutorSubject || "Предмет"}
+    </span>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={`select-arrow-icon ${isTutorDropdownOpen ? "is-open" : ""}`}
+      style={{
+        width: '16px',
+        height: '16px',
+        color: '#7994a6',
+        transform: isTutorDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.2s ease'
+      }}
+    >
+      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  </div>
+
+  {isTutorDropdownOpen && (
+  <div
+    className="select-dropdown"
+    style={{
+      position: 'absolute',
+      top: '46px', /* Сдвинуто под высоту 40px */
+      left: 0,
+      width: '100%',
+      background: '#fff',
+      border: '1px solid #dfe3e8',
+      borderRadius: '8px',
+      zIndex: 100,
+      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+      maxHeight: '200px',
+      overflowY: 'auto'
+    }}
+  >
+    {/* Добавили index в параметры map */}
+    {TUTOR_SUBJECTS.map((s, index) => (
+      <div
+        key={index} /* Заменили s.title на index, чтобы убрать ошибку [object Object] */
+        className={`select-option ${tutorSubject === s.title ? "selected" : ""}`}
+        onClick={() => { setTutorSubject(s.title); setIsTutorDropdownOpen(false); }}
+        style={{
+          padding: '10px 16px',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-futura)',
+          fontSize: 'var(--font-text-body)',
+          background: tutorSubject === s.title ? '#f4faff' : '#fff',
+          color: tutorSubject === s.title ? '#2d5d8f' : '#444'
+        }}
+      >
+        {s.title}
+      </div>
+    ))}
+  </div>
+)}
+</div>
+
+{/* Кнопка отправки */}
+<button
+  type="submit"
+  className="banner-form-btn"
+  style={{
+    height: '45px',
+    width: '153px',
+    border: 'none',
+    borderRadius: '8px',
+    background: '#2d5d8f',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'background 0.2s',
+    fontFamily: 'var(--font-futura)',
+    fontSize: 'var(--text-body)',
+    fontWeight: 400,
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+    boxSizing: 'border-box'
+  }}
+>
+  Отправить
+</button>
+  </form>
+</section>
 
       <WaveDivider variant="footer" />
-
-      {/* ── Footer ── */}
-      <div id="about">
-        <div className="footer-wrap">
-          <footer className="footer">
-            <div className="container footer-grid">
-              <div className="footer-info-col">
-                <div className="footer-logo-box">
-                  <Logo variant="footer" />
-                </div>
-                <p className="footer-address text-h3">
-                  ООО «Пифагор Центр», УНП 193900047<br />
-                  Юридический адрес: 220019 г. Минск,<br />
-                  ул. Сухаревская, д. 16<br />
-                  Свидетельство регистрации от 20.08.2025,<br />
-                  выдано Минским горисполкомом<br />
-                  Режим работы: пн–пт 10:00–20:00
-                </p>
-              </div>
-              <div className="footer-menu-col">
-                <p className="footer-link" onClick={onBack} style={{ cursor: "pointer" }}>Предметы</p>
-                <p className="footer-link">Репетиторы</p>
-                <p className="footer-link">Цены</p>
-                <p className="footer-link">Отзывы</p>
-                <p className="footer-link">Личный кабинет</p>
-                <p className="footer-link">О нас</p>
-              </div>
-              <div className="footer-actions-col">
-                <button type="button" className="footer-cta-btn">
-                  Присоединиться к занятиям
-                </button>
-                <div className="footer-social-box">
-                  <p className="footer-social-title">Хочешь узнать больше?<br />Напиши нам!</p>
-                  <div className="footer-social-icons">
-                    <div className="social-icon instagram"><img src={inst} alt="Instagram" /></div>
-                    <div className="social-icon telegram"><img src={tg} alt="Telegram" /></div>
-                    <div className="social-icon viber"><img src={vb} alt="Viber" /></div>
-                  </div>
-                  <p className="footer-email">pifagor@gmail.com</p>
-                </div>
-              </div>
-            </div>
-          </footer>
-        </div>
-      </div>
-
+      <Footer onHome={onBack} onNavigate={onNavigate} />
     </div>
   );
 }

@@ -1,6 +1,24 @@
 /* ── Subject page banner (narrower form strip) ── */
 
+.subject-banner__decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.subject-banner__decor-item {
+  position: absolute;
+  height: auto;
+  mix-blend-mode: screen;
+  object-fit: contain;
+  transform-origin: center center;
+}
+
 .subject-banner .banner::after {
+  background-image: none !important;
+  background: radial-gradient(circle at 100% 100%, #FFFFFF 0%, #FFF5D1 15%, #FFAE00 55%, #E69100 85%, #CC7A00 100%);
   bottom: -60px;
 }
 
@@ -102,52 +120,94 @@
   text-align: center;
 }
 
-/* ── FAQ ── */
-
-.faq-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border-top: 1px solid #e2e8f0;
-}
-
+/* Базовые стили для плашки (Математика и Физика по умолчанию) */
 .faq-item {
-  border-bottom: 1px solid #e2e8f0;
+  background-color: #F4FAFC; /* Нежно-голубой фон */
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Растягиваем плашку на всю ширину контейнера */
+  box-sizing: border-box;
 }
 
-.faq-question {
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 18px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  cursor: pointer;
-  text-align: left;
-  font-family: var(--font-futura);
-  font-size: var(--text-body);
-  color: #1e293b;
+/* Кнопка-вопрос (Исправлено флексами) */
+.faq-item .faq-question {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important; /* Убираем фиксированную высоту, из-за которой она сжалась */
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 24px 32px !important;
+  background: none !important;
+  border: none !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  color: #1A547E;
+  box-sizing: border-box !important;
 }
 
-.faq-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  color: #64748b;
-  transition: transform 0.25s ease;
+/* Принудительно заставляем текст вопроса не сжиматься */
+.faq-item .faq-question > span {
+  display: inline-block !important;
+  width: auto !important;
 }
 
-.faq-icon--open {
-  transform: rotate(180deg);
+/* Иконка-стрелочка (Фиксируем жесткие размеры) */
+.faq-item .faq-icon {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important; /* Не даем ей сжиматься */
+  min-height: 20px !important;
+  color: #7994A6;
+  transition: transform 0.3s ease !important;
+  display: block !important;
 }
 
-.faq-answer {
-  padding: 0 0 18px;
-  color: #475569;
-  line-height: 1.6;
-  max-width: 760px;
+/* Поворот стрелочки при открытии */
+.faq-item .faq-icon--open {
+  transform: rotate(180deg) !important;
+}
+
+/* Текст ответа */
+.faq-item .faq-answer {
+  padding: 0 32px 24px 32px !important;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A738E;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ── ТЕМА: АНГЛИЙСКИЙ ЯЗЫК ── */
+.faq-item.theme-english {
+  background-color: #FFFDF5;
+}
+.faq-item.theme-english .faq-question {
+  color: #8A5400 !important;
+}
+.faq-item.theme-english .faq-icon {
+  color: #B38F54 !important;
+}
+.faq-item.theme-english .faq-answer {
+  color: #8C765C !important;
+}
+
+/* ── ТЕМА: ХИМИЯ ── */
+.faq-item.theme-chemistry {
+  background-color: #F2FAF7;
+}
+.faq-item.theme-chemistry .faq-question {
+  color: #167A60 !important;
+}
+.faq-item.theme-chemistry .faq-icon {
+  color: #63A391 !important;
+}
+.faq-item.theme-chemistry .faq-answer {
+  color: #5A857A !important;
 }
 
 /* ── Responsive adjustments for subject pages ── */

@@ -3,7 +3,7 @@
   --blue: #2563eb;
   --cyan: #06b6d4;
   --accent: #f9ab01;
-  --bg: #f5f7fa;
+  --bg: white;
   --text: #1f2937;
   --muted: #6b7280;
 
@@ -104,6 +104,18 @@ body {
   font-size: var(--text-body);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+#prices {
+  scroll-margin-top: 150px;
+}
+
+#reviews {
+  scroll-margin-top: 120px;
+}
+
 @media (max-width: 1024px) {
   :root {
     --text-display: 72px;
@@ -136,7 +148,8 @@ body {
   user-select: none;
   font-size: 16px;
   color: #1f2937;
-  height: 48px;
+  height: 40px;
+  width: 155px;
   box-sizing: border-box;
 }
 
