@@ -20,6 +20,12 @@ export interface SubjectCard {
   subjectKey: SubjectKey;
 }
 
+export const SUBJECT_BANNER_BULLETS = [
+  "поднимем оценку в школе",
+  "подготовим к экзаменам",
+  "бесплатное пробное занятие",
+];
+
 export const SUBJECTS: SubjectCard[] = [
   {
     title: "Математика",

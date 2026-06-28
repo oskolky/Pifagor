@@ -7,14 +7,15 @@ import { WaveDivider } from "./components/WaveDivider";
 import { ReviewsSlider } from "./components/ReviewsSlider";
 import { BookingForm } from "./components/BookingForm";
 import { TutorApplicationForm } from "./components/TutorApplicationForm";
+import { BannerBullets } from "./components/BannerBullets";
 import { Logo } from "./components/Logo";
 import alexeyPetrovImg from "./assets/Alexey Petrov.png";
 import tutorsBannerImg from "./assets/tutors.png";
 import arrowIcon from "./assets/Arrow.svg";
 import selectSvg from "./assets/select.svg";
-import { PRICING_FEATURES, REVIEW_IMAGES, SUBJECTS } from "./data/site";
+import { PRICING_FEATURES, SUBJECTS } from "./data/site";
 import { scrollToBookingForm } from "./utils/scroll";
-import { useFaq, usePrices, useReviews, useSubjects, useTutors } from "./hooks/usePublicData";
+import { useFaq, usePrices, useSubjects, useTutors } from "./hooks/usePublicData";
 import {
   filterTutorsBySubjectName,
   mapApiFaq,
@@ -22,6 +23,7 @@ import {
   type DisplayTutor,
 } from "./utils/tutors";
 import type { PageKey } from "./types/navigation";
+import type { ApiTutor } from "./api/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,14 +36,49 @@ interface FAQ {
 
 const TUTOR_SUBJECTS = SUBJECTS.map(({ title }) => ({ title }));
 
-const FALLBACK_TUTORS: DisplayTutor[] = [
-  { id: 1, name: "Алексей Петров", title: "Math Diamond Coach", image: alexeyPetrovImg },
-  { id: 2, name: "Алексей Петров", title: "Math Diamond Coach", image: alexeyPetrovImg },
+const FALLBACK_API_TUTORS: ApiTutor[] = [
+  {
+    id: 1,
+    bio: "Math Diamond Coach",
+    is_published: true,
+    user: {
+      id: 1,
+      first_name: "Алексей",
+      last_name: "Петров",
+      email: "demo@pifagor.by",
+    },
+    subjects: [
+      { id: 1, name: "Математика", slug: "matematika" },
+      { id: 2, name: "Физика", slug: "fizika" },
+    ],
+  },
+  {
+    id: 2,
+    bio: "Math Diamond Coach",
+    is_published: true,
+    user: {
+      id: 2,
+      first_name: "Алексей",
+      last_name: "Петров",
+      email: "demo2@pifagor.by",
+    },
+    subjects: [
+      { id: 1, name: "Математика", slug: "matematika" },
+    ],
+  },
   {
     id: 3,
-    name: "Алексей Петров",
-    title: "Math Diamond Coach. 10 стобалльников. Учится в БГУ.",
-    image: alexeyPetrovImg,
+    bio: "Math Diamond Coach. 10 стобалльников. Учится в БГУ.",
+    is_published: true,
+    user: {
+      id: 3,
+      first_name: "Алексей",
+      last_name: "Петров",
+      email: "demo3@pifagor.by",
+    },
+    subjects: [
+      { id: 4, name: "Английский язык", slug: "angliyskiy" },
+    ],
   },
 ];
 
@@ -199,21 +236,19 @@ interface TutorsPageProps {
 }
 
 export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
-  const [selectedSubject, setSelectedSubject] = useState("Английский язык");
+  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0].title);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { data: subjects } = useSubjects();
   const { data: apiTutors } = useTutors();
   const { data: apiFaqs } = useFaq();
-  const { data: reviews } = useReviews();
   const { lessonPrice } = usePrices();
 
   const tutors = useMemo(() => {
-    if (!apiTutors.length) return FALLBACK_TUTORS;
-    const filtered = filterTutorsBySubjectName(apiTutors, selectedSubject);
-    const list = filtered.length ? filtered : apiTutors;
-    return list.map((t) => mapApiTutor(t, alexeyPetrovImg));
-  }, [apiTutors, selectedSubject]);
+    const source = apiTutors.length ? apiTutors : FALLBACK_API_TUTORS;
+    const filtered = filterTutorsBySubjectName(source, selectedSubject, subjects);
+    return filtered.map((t) => mapApiTutor(t, alexeyPetrovImg));
+  }, [apiTutors, selectedSubject, subjects]);
 
   const faqs = useMemo(() => {
     if (!apiFaqs.length) return FALLBACK_FAQS;
@@ -230,9 +265,7 @@ export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
           <div className="banner-inner">
             <div className="banner-content">
               <h1 className="banner-title text-display-unbounded">Репетиторы</h1>
-              <p className="banner-subtitle text-h1-futura">
-                Поможем подтянуть оценки, подготовиться к ЦЭ и ЦТ
-              </p>
+              <BannerBullets style={{ marginTop: 8 }} />
             </div>
 
             <img src={tutorsBannerImg} alt="" className="banner-image banner-image--tutors" />
@@ -286,18 +319,19 @@ export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
         </div>
 
         <div className="tutors-page-grid">
-          {tutors.map((t) => (
-            <TutorCard key={t.id} tutor={t} />
-          ))}
+          {tutors.length === 0 ? (
+            <p className="tutors-page-empty text-h3">
+              По предмету «{selectedSubject}» репетиторы не найдены
+            </p>
+          ) : (
+            tutors.map((t) => <TutorCard key={t.id} tutor={t} />)
+          )}
         </div>
       </div>
 
       {/* ── Reviews ── */}
       <div id="reviews" style={{ marginTop: 48 }}>
-        <ReviewsSlider
-          reviewsData={reviews.length ? undefined : REVIEW_IMAGES}
-          textReviews={reviews.length ? reviews : undefined}
-        />
+        <ReviewsSlider />
       </div>
 
       {/* ── Pricing ── */}
@@ -340,12 +374,7 @@ export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
             </div>
           </div>
 
-          <div
-            className="price-right"
-            style={{
-              background: `radial-gradient(circle at center, rgba(255,255,255,0.35) 0%, #1D809F 80%, #0D2942 100%)`,
-            }}
-          >
+          <div className="price-right">
             <div className="price-right-inner">
               <Logo variant="footer" />
               <div className="price-right-tagline text-h1-futura">

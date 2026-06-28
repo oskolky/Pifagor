@@ -23,6 +23,14 @@ class InviteCodeResponse(BaseModel):
     # Пишем model_config точно так же, как во всём твоем файле
     model_config = {"from_attributes": True}
 
+
+class InviteCodeValidateOut(BaseModel):
+    code: str
+    role: RoleEnum
+    is_used: bool
+
+    model_config = {"from_attributes": True}
+
 class Token(BaseModel):
     access_token: str
     refresh_token: str
@@ -132,6 +140,48 @@ class TutorProfileUpdate(BaseModel):
     experience_years: Optional[int] = None
     rate_per_hour: Optional[float] = None
     is_published: Optional[bool] = None
+
+
+class TutorSelfProfileUpdate(BaseModel):
+    bio: Optional[str] = None
+    education: Optional[str] = None
+    experience_years: Optional[int] = None
+    rate_per_hour: Optional[float] = None
+
+
+class TutorUserBrief(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: str
+    avatar_url: Optional[str] = None
+
+
+class TutorDetailOut(BaseModel):
+    id: int
+    bio: Optional[str] = None
+    education: Optional[str] = None
+    experience_years: Optional[int] = None
+    rate_per_hour: Optional[float] = None
+    is_published: bool
+    user: TutorUserBrief
+    subjects: List[SubjectOut] = []
+
+
+class AdminTutorUserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class AdminTutorUpdate(BaseModel):
+    bio: Optional[str] = None
+    education: Optional[str] = None
+    experience_years: Optional[int] = None
+    rate_per_hour: Optional[float] = None
+    is_published: Optional[bool] = None
+    subject_ids: Optional[List[int]] = None
+    user: Optional[AdminTutorUserUpdate] = None
 
 
 # ─── Lesson ───────────────────────────────────────────────────────────────────

@@ -77,7 +77,9 @@ export function BookingForm({
   return (
     <form id={formId} className={formClassName} onSubmit={handleSubmit}>
       <div className="banner-form-info">
-        <div className="banner-form-small">Не уверены в знаниях?</div>
+        <div className="banner-form-small">
+          Не уверены в знаниях<span className="banner-form-punct">?</span>
+        </div>
         <div className="banner-form-big">Запишитесь на пробное!</div>
       </div>
 

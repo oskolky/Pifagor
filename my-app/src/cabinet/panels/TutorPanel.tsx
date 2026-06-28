@@ -7,7 +7,8 @@ import {
   fetchTutorFinance,
   uploadTutorAct,
 } from "../../api/cabinet";
-import type { ApiAct, ApiReport, ApiTutorContract, ApiUser } from "../../api/types";
+import type { ApiAct, ApiReport, ApiTutor, ApiTutorContract, ApiUser } from "../../api/types";
+import { fetchMyTutorProfile } from "../../api/users";
 import { fetchTutorStudents } from "../../api/lessons";
 import { useCabinet } from "../context";
 import { fullName } from "../utils";
@@ -23,10 +24,12 @@ import {
 } from "../components/Ui";
 import { ReportModal } from "../components/ReportModal";
 import { ScheduleSection } from "../components/ScheduleSection";
+import { TutorProfileForm } from "../components/TutorProfileForm";
 
 const TABS = [
   { id: "schedule", label: "Расписание" },
   { id: "students", label: "Ученики" },
+  { id: "profile", label: "Профиль" },
   { id: "finance", label: "Финансы / Акт" },
 ];
 
@@ -41,6 +44,8 @@ export function TutorPanel({ user }: { user: ApiUser }) {
   const [reports, setReports] = useState<ApiReport[]>([]);
   const [loadingFinance, setLoadingFinance] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [profile, setProfile] = useState<ApiTutor | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   const loadFinance = async () => {
     setLoadingFinance(true);
@@ -67,6 +72,13 @@ export function TutorPanel({ user }: { user: ApiUser }) {
         .catch(() => setStudents([]));
     }
     if (tab === "finance") loadFinance();
+    if (tab === "profile") {
+      setLoadingProfile(true);
+      fetchMyTutorProfile()
+        .then(setProfile)
+        .catch(() => setProfile(null))
+        .finally(() => setLoadingProfile(false));
+    }
   }, [tab]);
 
   const handleUploadAct = async (file: File) => {
@@ -110,6 +122,32 @@ export function TutorPanel({ user }: { user: ApiUser }) {
             ))
           )}
         </div>
+      )}
+
+      {tab === "profile" && (
+        <CabinetCard title="Профиль на сайте">
+          {loadingProfile ? (
+            <CabinetLoading />
+          ) : profile ? (
+            <>
+              <div className="cabinet-inline-actions" style={{ marginBottom: 16 }}>
+                <CabinetBadge variant={profile.is_published ? "green" : "gray"}>
+                  {profile.is_published ? "Опубликован" : "Не опубликован"}
+                </CabinetBadge>
+                {profile.subjects.length > 0 && profile.subjects.map((s) => (
+                  <CabinetBadge key={s.id} variant="blue">{s.name}</CabinetBadge>
+                ))}
+              </div>
+              <TutorProfileForm
+                mode="view"
+                tutor={profile}
+                subjects={[]}
+              />
+            </>
+          ) : (
+            <div className="cabinet-empty">Не удалось загрузить профиль</div>
+          )}
+        </CabinetCard>
       )}
 
       {tab === "finance" && (

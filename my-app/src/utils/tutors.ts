@@ -1,5 +1,6 @@
 import type { ApiSubject, ApiTutor } from "../api/types";
 import type { SubjectKey } from "../types/navigation";
+import { SUBJECTS } from "../data/site";
 import { slugForSubjectKey } from "../data/subjectMap";
 
 export interface DisplayTutor {
@@ -37,12 +38,30 @@ export function mapApiTutor(tutor: ApiTutor, fallbackImage?: string): DisplayTut
   };
 }
 
+export function resolveSubjectSlug(
+  subjectName: string,
+  apiSubjects?: ApiSubject[],
+): string | undefined {
+  const fromSite = SUBJECTS.find(
+    (s) => s.title.toLowerCase() === subjectName.toLowerCase(),
+  );
+  if (fromSite) return slugForSubjectKey(fromSite.subjectKey);
+
+  return apiSubjects?.find((s) => s.name.toLowerCase() === subjectName.toLowerCase())?.slug;
+}
+
 export function filterTutorsBySubjectName(
   tutors: ApiTutor[],
   subjectName: string,
+  apiSubjects?: ApiSubject[],
 ): ApiTutor[] {
+  const slug = resolveSubjectSlug(subjectName, apiSubjects);
+
   return tutors.filter((t) =>
-    t.subjects.some((s) => s.name.toLowerCase() === subjectName.toLowerCase()),
+    t.subjects.some((s) => {
+      if (slug && s.slug === slug) return true;
+      return s.name.toLowerCase() === subjectName.toLowerCase();
+    }),
   );
 }
 

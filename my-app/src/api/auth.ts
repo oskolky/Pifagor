@@ -1,6 +1,6 @@
 import { apiFetch } from "./client";
 import { tokenStore } from "./token";
-import type { ApiUser, AuthToken, InviteCode, UserRole } from "./types";
+import type { ApiUser, AuthToken, UserRole } from "./types";
 
 export function login(email: string, password: string) {
   return apiFetch<AuthToken>("/api/v1/auth/login", {
@@ -27,8 +27,15 @@ export function register(payload: {
   });
 }
 
-export function fetchInviteCodes() {
-  return apiFetch<InviteCode[]>("/api/v1/admin/invite-codes");
+export interface InviteCodeValidation {
+  code: string;
+  role: UserRole;
+  is_used: boolean;
+}
+
+export function validateInviteCode(code: string) {
+  const q = encodeURIComponent(code.trim());
+  return apiFetch<InviteCodeValidation>(`/api/v1/auth/invite-codes/validate?code=${q}`);
 }
 
 export function fetchMe() {
@@ -48,17 +55,27 @@ export function hasSession() {
 }
 
 export async function resolveRoleFromInviteCode(code: string): Promise<UserRole> {
+  const trimmed = code.trim();
   try {
-    const codes = await fetchInviteCodes();
-    const found = codes.find((c) => c.code === code);
-    if (found) return found.role;
-  } catch {
-    // fallback below
+    const found = await validateInviteCode(trimmed);
+    if (found.is_used) {
+      throw new Error("Код доступа уже использован");
+    }
+    return found.role;
+  } catch (err) {
+    if (err instanceof Error && err.message === "Код доступа уже использован") {
+      throw err;
+    }
+    // fallback by code prefix when API unavailable
   }
 
-  const lower = code.toLowerCase();
-  if (lower.includes("tutor") || lower.includes("rep")) return "tutor";
-  if (lower.includes("parent") || lower.includes("prn")) return "parent";
-  if (lower.includes("admin")) return "admin";
-  return "child";
+  const upper = trimmed.toUpperCase();
+  if (upper.includes("-TUT-")) return "tutor";
+  if (upper.includes("-PRN-")) return "parent";
+  if (upper.includes("-CHD-")) return "child";
+  if (upper.includes("TUTOR") || upper.includes("REP")) return "tutor";
+  if (upper.includes("PARENT") || upper.includes("PRN")) return "parent";
+  if (upper.includes("ADMIN")) return "admin";
+
+  throw new Error("Код доступа не найден");
 }

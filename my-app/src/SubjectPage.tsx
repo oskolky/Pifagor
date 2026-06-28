@@ -5,6 +5,7 @@ import { Footer } from "./components/Footer";
 import { WaveDivider } from "./components/WaveDivider";
 import { ReviewsSlider } from "./components/ReviewsSlider";
 import { BookingForm } from "./components/BookingForm";
+import { BannerBullets } from "./components/BannerBullets";
 import waveBlue from "./assets/wave_blue.svg";
 import alexeyPetrovImg from "./assets/Alexey Petrov.png";
 import homeImg from "./assets/homelander.png";
@@ -13,11 +14,11 @@ import engStatue from "./assets/main_page/eng_statue.png";
 import physicsStatue from "./assets/main_page/physics_statue.png";
 import chemStatue from "./assets/main_page/chem_statue.png";
 import chemistryBack from "./assets/chemistry_back.png";
-import { PRICING_FEATURES, REVIEW_IMAGES } from "./data/site";
+import { PRICING_FEATURES } from "./data/site";
 import { scrollToBookingForm } from "./utils/scroll";
-import { useFaq, usePrices, useReviews, useSubjects, useTutors } from "./hooks/usePublicData";
+import { useFaq, usePrices, useSubjects, useTutors } from "./hooks/usePublicData";
 import {
-  filterTutorsBySubjectKey,
+  filterTutorsBySubjectName,
   findSubjectIdByKey,
   mapApiFaq,
   mapApiTutor,
@@ -50,6 +51,7 @@ interface SubjectConfig {
   subtitle: string;
   accentColor: string;
   bgGradient: string;
+  priceRightGradient: string;
   bannerImage: string;
   imageStyle?: React.CSSProperties;
   badgeText?: string;
@@ -89,8 +91,9 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
     subtitle: "Unlock your potential in algebra, geometry, and calculus.",
     accentColor: "#1D809F",
     bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #AEE3F1 15%, #40A8C5 50%, #153E61 95%, #0D2942 100%)`,
+    priceRightGradient: "radial-gradient(circle at center, #5EA3C9 0%, #1D809F 55%, #205A7E 100%)",
     bannerImage: mathStatue,
-    imageStyle: { bottom: -260, width: 'min(460px, 40vw)', right: -70 },
+    imageStyle: { bottom: -160, left: 700, width: 'min(460px, 40vw)', right: -70 },
     tutors: [
       { name: "Алексей Петров",  title: "Тренер математических олимпиад",  avatarLetter: "А", avatarColor: "#245985" },
       { name: "Алексей Петров",  title: "Тренер математических олимпиад",  avatarLetter: "А", avatarColor: "#245985" },
@@ -115,9 +118,10 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
     accentColor: "#F9AB01",
     titlePaddingTop: 0 ,
     waveColor: 'blue',
-    bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #FFF5D1 15%, #FFAE00 55%, #E69100 85%, #CC7A00 100%)`,
+    bgGradient: `radial-gradient(circle at center, #FBBF24 0%, #F59E0B 55%, #D97706 100%)`,
+    priceRightGradient: "radial-gradient(circle at center, #FBBF24 0%, #F59E0B 55%, #D97706 100%)",
     bannerImage: engStatue,
-    imageStyle: { bottom: -140, width: 'min(550px, 40vw)', right: -100 },
+    imageStyle: { bottom: -70, width: 'min(600px, 40vw)', right: -100 },
     badgeText: "Not open book!",
     tutors: [
       { name: "Звёздочка",  title: "#Homelight",  avatarLetter: "А", avatarColor: "#F9AB01" },
@@ -142,9 +146,10 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
     subtitle: "Unlock your potential in algebra, geometry, and calculus.",
     accentColor: "#4FBED9",
     waveColor: 'blue',
-    bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #E0F7FC 20%, #4FBED9 60%, #3098B5 85%, #207D99 100%)`,
+    bgGradient: `radial-gradient(circle at 100% 100%, #6CD5F0 0%, #4FBED9 40%, #3098B5 75%, #207D99 100%)`,
+    priceRightGradient: "radial-gradient(circle at center, #6CD5F0 0%, #4FBED9 55%, #207D99 100%)",
     bannerImage: physicsStatue,
-    imageStyle: { bottom: -200, width: 'min(550px, 40vw)', right: 80 },
+    imageStyle: { bottom: -160, width: 'min(600px, 40vw)', right: 30 },
     tutors: [
       { name: "Алексей Смелый", title: "Эксперт",    avatarLetter: "А", avatarColor: "#40A8C5" },
      { name: "Джон Гиллман", title: "Я умнее, сильнее. Я лучше. Я лучше вас!",  image: homeImg },
@@ -167,9 +172,10 @@ const SUBJECT_CONFIGS: Record<SubjectKey, SubjectConfig> = {
     title: "Химия",
     subtitle: "Unlock your potential in algebra, geometry, and calculus.",
     accentColor: "#2AD4A7",
-    bgGradient: `radial-gradient(circle at 100% 100%, #FFFFFF 0%, #D4F9E9 15%, #2AD4A7 55%, #1AB28B 85%, #119674 100%)`,
+    bgGradient: `radial-gradient(circle at 100% 100%, #46EAC0 0%, #2AD4A7 40%, #1AB28B 75%, #119674 100%)`,
+    priceRightGradient: "radial-gradient(circle at center, #46EAC0 0%, #2AD4A7 55%, #119674 100%)",
     bannerImage: chemStatue,
-    imageStyle: { bottom: -190, width: 'min(590px, 40vw)', right: -20 },
+    imageStyle: { bottom: -150, width: 'min(650px, 40vw)', right: -50 },
     badgeText: "Химия",
     tutors: [
       { name: "Алексей Смелый", title: "Старт Эксперт",    avatarLetter: "А", avatarColor: "#23E2AF" },
@@ -419,14 +425,13 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
   const { data: apiTutors } = useTutors();
   const subjectId = findSubjectIdByKey(subjects, subject);
   const { data: apiFaqs } = useFaq(subjectId);
-  const { data: reviews } = useReviews();
   const { lessonPrice } = usePrices(subjectId);
 
   const tutors = useMemo((): Tutor[] => {
     if (!apiTutors.length) return cfg.tutors;
-    const filtered = filterTutorsBySubjectKey(apiTutors, subject);
-    const list = filtered.length ? filtered : apiTutors;
-    return list.slice(0, 3).map((t) => {
+
+    const filtered = filterTutorsBySubjectName(apiTutors, cfg.title, subjects);
+    return filtered.slice(0, 3).map((t) => {
       const mapped = mapApiTutor(t, alexeyPetrovImg);
       return {
         name: mapped.name,
@@ -436,7 +441,7 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
         image: mapped.image,
       };
     });
-  }, [apiTutors, subject, cfg.tutors, cfg.accentColor]);
+  }, [apiTutors, cfg.tutors, cfg.accentColor, cfg.title, subjects]);
 
   const faqs = useMemo(() => {
     if (!apiFaqs.length) return cfg.faqs;
@@ -485,7 +490,7 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
         <div className="banner-inner">
           <div className="banner-content">
             <h1 className="banner-title text-display-unbounded" style={{ maxWidth: 500,  paddingTop: cfg.titlePaddingTop ?? 60  }}>{cfg.title}</h1>
-            <p className="banner-subtitle text-h1-futura" style={{ maxWidth: 700, paddingTop:20 }}>{cfg.subtitle}</p>
+            <BannerBullets style={{ maxWidth: 700, paddingTop: 20 }} />
           </div>
           <img src={cfg.bannerImage} alt="" className="banner-image banner-image--subject" style={cfg.imageStyle} />
         </div>
@@ -518,9 +523,15 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
             flexWrap: 'wrap'
           }}
         >
-          {tutors.map((t, i) => (
-            <TutorCard key={i} tutor={t} accentColor={cfg.accentColor} />
-          ))}
+          {tutors.length === 0 ? (
+            <p className="subject-tutors-empty text-h3">
+              Репетиторы по этому предмету скоро появятся
+            </p>
+          ) : (
+            tutors.map((t, i) => (
+              <TutorCard key={i} tutor={t} accentColor={cfg.accentColor} />
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -528,10 +539,7 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
       {/* ── Reviews ── */}
       <div id="reviews">
         <div style={{ marginTop: 48 }}>
-          <ReviewsSlider
-            reviewsData={reviews.length ? undefined : REVIEW_IMAGES}
-            textReviews={reviews.length ? reviews : undefined}
-          />
+          <ReviewsSlider />
         </div>
       </div>
       {/* ── Pricing ── */}
@@ -573,16 +581,7 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
 
           <div
             className="price-right"
-            style={{
-              background: `radial-gradient(circle at center, rgba(255, 255, 255, 0.35) 0%, ${cfg.accentColor} 80%, ${
-                  cfg.accentColor === "#F9AB01" ? "#E69100" : // Английский (Строго свой край)
-                  cfg.accentColor === "#23E2AF" ? "#B6F3E1" : // Химия (Строго свой край)
-                  cfg.accentColor === "#4FBED9" ? "#2B8CA6" : // Физика (Строго свой край)
-                  cfg.accentColor === "#40A8C5" ? "#2087A3" : // МАТЕМАТИКА (Теперь изолирована и влияет ТОЛЬКО на себя!)
-                  cfg.accentColor                             // Любой другой новый предмет будет просто плавно уходить в свой же цвет
-              } 100%)`
-
-            }}
+            style={{ background: cfg.priceRightGradient }}
           >
             <div className="price-right-inner">
               <Logo variant="footer" />

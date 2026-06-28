@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import {
   createInviteCodes,
+  fetchAdminTutors,
   fetchAllUsers,
   fetchFinanceReport,
   fetchInviteCodes,
   fetchReceipts,
   parseEmails,
 } from "../../api/admin";
-import type { InviteCode, ApiUser } from "../../api/types";
+import { fetchSubjects } from "../../api/public";
+import type { ApiSubject, ApiTutor, InviteCode, ApiUser } from "../../api/types";
+import { filterAllowedSubjects } from "../../utils/subjects";
 import { useCabinet } from "../context";
 import { fullName, ROLE_LABELS, roleBadgeClass } from "../utils";
 import {
@@ -21,6 +24,7 @@ import {
   Field,
   PersonCard,
 } from "../components/Ui";
+import { AdminTutorEditor } from "../components/AdminTutorEditor";
 import { ScheduleSection } from "../components/ScheduleSection";
 
 const TABS = [
@@ -44,6 +48,9 @@ export function AdminPanel({ user }: { user: ApiUser }) {
   const [loadingCodes, setLoadingCodes] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingPayments, setLoadingPayments] = useState(false);
+  const [adminTutors, setAdminTutors] = useState<ApiTutor[]>([]);
+  const [subjects, setSubjects] = useState<ApiSubject[]>([]);
+  const [loadingTutors, setLoadingTutors] = useState(false);
 
   const [codeType, setCodeType] = useState("tutor");
   const [codeDesc, setCodeDesc] = useState("");
@@ -54,8 +61,9 @@ export function AdminPanel({ user }: { user: ApiUser }) {
     setLoadingCodes(true);
     try {
       setCodes(await fetchInviteCodes());
-    } catch {
+    } catch (err) {
       setCodes([]);
+      toast(err instanceof Error ? err.message : "Не удалось загрузить коды", "error");
     } finally {
       setLoadingCodes(false);
     }
@@ -86,6 +94,23 @@ export function AdminPanel({ user }: { user: ApiUser }) {
     }
   };
 
+  const loadTutors = async () => {
+    setLoadingTutors(true);
+    try {
+      const [tutorList, subjectList] = await Promise.all([
+        fetchAdminTutors(),
+        fetchSubjects(),
+      ]);
+      setAdminTutors(tutorList);
+      setSubjects(filterAllowedSubjects(subjectList));
+    } catch {
+      setAdminTutors([]);
+      setSubjects([]);
+    } finally {
+      setLoadingTutors(false);
+    }
+  };
+
   useEffect(() => {
     loadCodes();
     loadUsers();
@@ -93,6 +118,10 @@ export function AdminPanel({ user }: { user: ApiUser }) {
 
   useEffect(() => {
     if (tab === "payments") loadPayments();
+  }, [tab]);
+
+  useEffect(() => {
+    if (tab === "tutors") loadTutors();
   }, [tab]);
 
   const handleGenerate = async () => {
@@ -117,8 +146,17 @@ export function AdminPanel({ user }: { user: ApiUser }) {
     }
   };
 
-  const tutors = users.filter((u) => u.role === "tutor");
   const students = users.filter((u) => u.role === "child");
+
+  const handleTutorUpdated = (updated: ApiTutor) => {
+    setAdminTutors((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    toast("Профиль репетитора сохранён");
+  };
+
+  const handleTutorDeleted = (tutorId: number) => {
+    setAdminTutors((prev) => prev.filter((t) => t.id !== tutorId));
+    toast("Репетитор удалён");
+  };
 
   return (
     <>
@@ -214,16 +252,29 @@ export function AdminPanel({ user }: { user: ApiUser }) {
       )}
 
       {tab === "tutors" && (
-        <div className="cabinet-stack">
-          {loadingUsers ? <CabinetLoading /> : tutors.map((t) => (
-            <PersonCard
-              key={t.id}
-              name={fullName(t.first_name, t.last_name)}
-              email={t.email}
-              badge={<CabinetBadge variant="purple">Репетитор</CabinetBadge>}
-            />
-          ))}
-        </div>
+        <>
+          <CabinetAlert>
+            Чтобы добавить нового репетитора: создайте код доступа → отправьте репетитору →
+            после регистрации заполните профиль, назначьте предметы и включите публикацию.
+          </CabinetAlert>
+          <div className="cabinet-stack">
+            {loadingTutors ? (
+              <CabinetLoading />
+            ) : adminTutors.length === 0 ? (
+              <div className="cabinet-empty">Репетиторов пока нет</div>
+            ) : (
+              adminTutors.map((t) => (
+                <AdminTutorEditor
+                  key={t.id}
+                  tutor={t}
+                  subjects={subjects}
+                  onUpdated={handleTutorUpdated}
+                  onDeleted={handleTutorDeleted}
+                />
+              ))
+            )}
+          </div>
+        </>
       )}
 
       {tab === "students" && (

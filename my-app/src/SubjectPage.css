@@ -87,6 +87,16 @@
   flex-wrap: wrap;
 }
 
+.subject-tutors-empty {
+  width: 100%;
+  margin: 24px 0 8px;
+  padding: 32px 24px;
+  text-align: center;
+  color: #5a738e;
+  background: #f4fafc;
+  border-radius: 16px;
+}
+
 .tutor-card {
   display: flex;
   flex-direction: column;

@@ -1,20 +1,48 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from backend.app.db.session import get_db
 from backend.app.models.models import User, TutorProfile, RoleEnum
-from backend.app.schemas.schemas import UserOut, UserUpdate, TutorProfileOut, TutorProfileUpdate, UserMeOut
+from backend.app.schemas.schemas import (
+    UserOut,
+    UserUpdate,
+    TutorSelfProfileUpdate,
+    TutorDetailOut,
+    UserMeOut,
+)
 from backend.app.core.deps import get_current_user, require_admin
+from backend.app.services.tutor_profiles import (
+    get_tutor_profile,
+    serialize_tutor_profile,
+    tutor_profile_load_options,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/me", response_model=UserMeOut)
+@router.get("/me")
 async def get_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    # Превращаем базовые поля пользователя в словарь
+    user_data = {
+        "id": current_user.id,
+        "email": current_user.email,
+        "first_name": current_user.first_name,
+        "last_name": current_user.last_name,
+        "role": current_user.role,
+        "avatar_url": current_user.avatar_url,
+        "is_active": current_user.is_active,
+        "created_at": current_user.created_at,
+        # Безопасно вытаскиваем только id профилей, чтобы фронтенд не падал
+        "tutor_profile": {"id": current_user.tutor_profile.id} if current_user.tutor_profile else None,
+        "child_profile": {"id": current_user.child_profile.id} if current_user.child_profile else None,
+        "parent_profile": {"id": current_user.parent_profile.id} if current_user.parent_profile else None,
+    }
+
+    # Валидируем через вашу схему вручную, чтобы убедиться в корректности типов
+    return UserMeOut.model_validate(user_data)
 
 
 @router.patch("/me", response_model=UserOut)
@@ -23,6 +51,11 @@ async def update_me(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if current_user.role == RoleEnum.tutor:
+        raise HTTPException(
+            status_code=403,
+            detail="Репетитор не может редактировать личные данные — обратитесь к администратору",
+        )
     for field, value in data.model_dump(exclude_none=True).items():
         setattr(current_user, field, value)
     await db.commit()
@@ -39,86 +72,43 @@ async def list_users(
     return result.scalars().all()
 
 
-@router.get("/{user_id}", response_model=UserOut)
-async def get_user(
-    user_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    if current_user.role != RoleEnum.admin and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-
 # ─── Tutor profiles (public list for website) ─────────────────────────────────
 
 @router.get("/tutors/public", response_model=list[dict])
 async def list_published_tutors(db: AsyncSession = Depends(get_db)):
     """Published tutor profiles for the public website."""
-    from sqlalchemy.orm import joinedload, selectinload
-    from backend.app.models.models import TutorSubject
-
     result = await db.execute(
         select(TutorProfile)
         .where(TutorProfile.is_published == True)
-        .options(
-            joinedload(TutorProfile.user),
-            selectinload(TutorProfile.subjects).joinedload(TutorSubject.subject),
-        )
+        .options(*tutor_profile_load_options())
     )
     profiles = result.scalars().unique().all()
-
-    output = []
-    for profile in profiles:
-        u = profile.user
-        output.append({
-            "id": profile.id,
-            "bio": profile.bio,
-            "education": profile.education,
-            "experience_years": profile.experience_years,
-            "rate_per_hour": profile.rate_per_hour,
-            "is_published": profile.is_published,
-            "user": {
-                "id": u.id,
-                "first_name": u.first_name,
-                "last_name": u.last_name,
-                "email": u.email,
-                "avatar_url": u.avatar_url,
-            },
-            "subjects": [
-                {
-                    "id": ts.subject.id,
-                    "name": ts.subject.name,
-                    "slug": ts.subject.slug,
-                }
-                for ts in profile.subjects
-                if ts.subject is not None
-            ],
-        })
-
-    return output
+    return [serialize_tutor_profile(profile) for profile in profiles]
 
 
-@router.patch("/tutors/me", response_model=TutorProfileOut)
-async def update_tutor_profile(
-    data: TutorProfileUpdate,
+@router.get("/tutors/me", response_model=TutorDetailOut)
+async def get_my_tutor_profile(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     if current_user.role != RoleEnum.tutor:
-        raise HTTPException(status_code=403, detail="Only tutors can update tutor profile")
-    profile = current_user.tutor_profile
-    if not profile:
+        raise HTTPException(status_code=403, detail="Only tutors can access tutor profile")
+    if not current_user.tutor_profile:
         raise HTTPException(status_code=404, detail="Tutor profile not found")
-    for field, value in data.model_dump(exclude_none=True).items():
-        setattr(profile, field, value)
-    await db.commit()
-    await db.refresh(profile)
-    return profile
+    profile = await get_tutor_profile(db, current_user.tutor_profile.id)
+    return serialize_tutor_profile(profile)
+
+
+@router.patch("/tutors/me", response_model=TutorDetailOut)
+async def update_tutor_profile(
+    data: TutorSelfProfileUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    raise HTTPException(
+        status_code=403,
+        detail="Репетитор не может редактировать профиль — обратитесь к администратору",
+    )
 
 
 @router.get("/students/list", response_model=list[dict])
@@ -152,3 +142,18 @@ async def list_students_for_tutor(
             status_code=500,
             detail=f"Ошибка базы данных: {str(e)}"
         )
+
+
+@router.get("/{user_id}", response_model=UserOut)
+async def get_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != RoleEnum.admin and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user

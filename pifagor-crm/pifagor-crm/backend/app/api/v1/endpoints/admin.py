@@ -9,16 +9,25 @@ from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from backend.app.db.session import get_db
+from backend.app.core.deps import require_admin
 from backend.app.models.models import (
     InviteCode, RoleEnum, Lesson, LessonStatus,
-    ChildProfile, User, EmailReceipt
+    ChildProfile, User, EmailReceipt, TutorProfile,
 )
 from backend.app.schemas.schemas import (
     InviteCodeCreate, InviteCodeResponse,
     EmailReceiptOut, StudentFinanceRow,
+    AdminTutorUpdate, TutorDetailOut,
+)
+from backend.app.services.tutor_profiles import (
+    apply_tutor_profile_updates,
+    delete_tutor_profile,
+    get_tutor_profile,
+    serialize_tutor_profile,
+    tutor_profile_load_options,
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_admin)])
 
 
 def generate_random_code(prefix: str) -> str:
@@ -177,3 +186,50 @@ async def finance_report(
         ))
 
     return rows
+
+
+@router.get("/tutors", response_model=List[TutorDetailOut])
+async def list_admin_tutors(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(TutorProfile)
+        .join(User, TutorProfile.user_id == User.id)
+        .where(User.role == RoleEnum.tutor)
+        .options(*tutor_profile_load_options())
+        .order_by(TutorProfile.id)
+    )
+    profiles = result.scalars().unique().all()
+    return [serialize_tutor_profile(profile) for profile in profiles]
+
+
+@router.patch("/tutors/{tutor_id}", response_model=TutorDetailOut)
+async def update_admin_tutor(
+    tutor_id: int,
+    data: AdminTutorUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    profile = await get_tutor_profile(db, tutor_id)
+    payload = data.model_dump(exclude_none=True)
+    user_data = payload.pop("user", None) or {}
+
+    profile = await apply_tutor_profile_updates(
+        db,
+        profile,
+        bio=payload.get("bio"),
+        education=payload.get("education"),
+        experience_years=payload.get("experience_years"),
+        rate_per_hour=payload.get("rate_per_hour"),
+        is_published=payload.get("is_published"),
+        subject_ids=payload.get("subject_ids"),
+        user_first_name=user_data.get("first_name"),
+        user_last_name=user_data.get("last_name"),
+        user_avatar_url=user_data.get("avatar_url"),
+    )
+    return serialize_tutor_profile(profile)
+
+
+@router.delete("/tutors/{tutor_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_admin_tutor(
+    tutor_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    await delete_tutor_profile(db, tutor_id)

@@ -211,10 +211,40 @@
 }
 
 .banner-subtitle {
-  margin-top:0px;
+  margin-top: 0;
   color: rgba(255, 255, 255, 0.85);
   max-width: 800px;
-  line-height: 1;
+  line-height: 1.35;
+}
+
+.banner-bullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 800px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.banner-bullets li {
+  position: relative;
+  padding-left: 1.25em;
+  line-height: 1.4;
+}
+
+.banner-bullets li + li {
+  margin-top: 10px;
+}
+
+.banner-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f9ab01;
+  box-shadow: 0 0 0 2px rgba(249, 171, 1, 0.25);
 }
 
 .banner-image {
@@ -319,13 +349,21 @@
 }
 
 .banner-form-small {
+  font-family: var(--font-futura);
   font-size: var(--bf-text-sm);
   color: #8c97a6;
   margin-bottom: 4px;
   margin-left: var(--bf-label-offset);
 }
 
+.banner-form-punct {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
 .banner-form-big {
+  font-family: var(--font-futura);
   font-size: var(--bf-form-big);
   color: #111827;
   line-height: 1;
@@ -590,11 +628,15 @@
 .price-right {
   width: 514px;
   flex: 0 1 514px;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.25) 0%, #40A8C5 50%, #245985 100%);
+  /* Убрали белый цвет из центра, заменили на плотный золотой #F9A11B */
+  background: radial-gradient(circle at center, #5EA3C9 0%, #205A7E 60%, #113450 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* Мягкая тень для текста, чтобы белые буквы идеально читались */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .price-right-inner {

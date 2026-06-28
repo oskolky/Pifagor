@@ -9,9 +9,9 @@ import { BookingForm } from "./components/BookingForm";
 import { Logo } from "./components/Logo";
 import mainImg from "./assets/main_page/main_statue.png";
 import arrowIcon from "./assets/main_page/cards/arrow.png";
-import { SUBJECTS, PRICING_FEATURES, REVIEW_IMAGES } from "./data/site";
+import { SUBJECTS, PRICING_FEATURES } from "./data/site";
 import { scrollToBookingForm, scrollToTop } from "./utils/scroll";
-import { usePrices, useReviews, useSubjects } from "./hooks/usePublicData";
+import { usePrices, useSubjects } from "./hooks/usePublicData";
 import TutorsPage from "./TutorsPage";
 import SubjectPage from "./SubjectPage";
 import CabinetPage from "./CabinetPage";
@@ -20,7 +20,6 @@ import type { ActivePage, PageKey } from "./types/navigation";
 export default function PifagorHome() {
   const [activePage, setActivePage] = useState<ActivePage>(null);
   const { data: subjects } = useSubjects();
-  const { data: reviews } = useReviews();
   const { lessonPrice } = usePrices();
 
   const handleHome = () => {
@@ -63,11 +62,8 @@ export default function PifagorHome() {
               <br />
               <span>5-11 классов</span>
             </h1>
-            <p
-              className="banner-subtitle text-h1-futura"
-              style={{ fontSize: "60px", fontFamily: "Futura PT" }}
-            >
-              Поможем подтянуть оценки, подготовиться к ЦЭ и ЦТ,
+            <p className="banner-subtitle text-h1-futura" style={{ marginTop: 8 }}>
+              Поможем подтянуть оценки, подготовиться к ЦЭ и ЦТ,{" "}
               <br />
               разобраться в сложных темах
             </p>
@@ -158,10 +154,7 @@ export default function PifagorHome() {
       </div>
 
       <div id="reviews">
-        <ReviewsSlider
-          reviewsData={reviews.length ? undefined : REVIEW_IMAGES}
-          textReviews={reviews.length ? reviews : undefined}
-        />
+        <ReviewsSlider />
       </div>
 
       <WaveDivider variant="footer" />
