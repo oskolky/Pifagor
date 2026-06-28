@@ -5,21 +5,23 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { WaveDivider } from "./components/WaveDivider";
 import { ReviewsSlider } from "./components/ReviewsSlider";
+import { BookingForm } from "./components/BookingForm";
 import { Logo } from "./components/Logo";
 import mainImg from "./assets/main_page/main_statue.png";
 import arrowIcon from "./assets/main_page/cards/arrow.png";
 import { SUBJECTS, PRICING_FEATURES, REVIEW_IMAGES } from "./data/site";
 import { scrollToBookingForm, scrollToTop } from "./utils/scroll";
+import { usePrices, useReviews, useSubjects } from "./hooks/usePublicData";
 import TutorsPage from "./TutorsPage";
 import SubjectPage from "./SubjectPage";
+import CabinetPage from "./CabinetPage";
 import type { ActivePage, PageKey } from "./types/navigation";
 
 export default function PifagorHome() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [subject, setSubject] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const [activePage, setActivePage] = useState<ActivePage>(null);
+  const { data: subjects } = useSubjects();
+  const { data: reviews } = useReviews();
+  const { lessonPrice } = usePrices();
 
   const handleHome = () => {
     setActivePage(null);
@@ -33,6 +35,10 @@ export default function PifagorHome() {
 
   if (activePage === "tutors") {
     return <TutorsPage onBack={handleHome} onNavigate={handleNavigate} />;
+  }
+
+  if (activePage === "cabinet") {
+    return <CabinetPage onBack={handleHome} onNavigate={handleNavigate} />;
   }
 
   if (activePage) {
@@ -70,69 +76,7 @@ export default function PifagorHome() {
           <img src={mainImg} alt="" className="banner-image" />
         </div>
 
-        <form id="top-booking-form" className="banner-form" onSubmit={(e) => e.preventDefault()}>
-          <div className="banner-form-info">
-            <div className="banner-form-small">Не уверены в знаниях?</div>
-            <div className="banner-form-big">Запишитесь на пробное!</div>
-          </div>
-
-          <input
-            type="text"
-            placeholder="Имя родителя"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <input
-            type="tel"
-            placeholder="Номер телефона"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-
-          <div className="select-wrapper">
-            <div
-              className={`select-trigger ${!subject ? "placeholder" : ""}`}
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              <span>{subject || "Предмет"}</span>
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className={`select-arrow-icon ${isOpen ? "is-open" : ""}`}
-              >
-                <path
-                  d="M6 9l6 6 6-6"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-
-            {isOpen && (
-              <div className="select-dropdown">
-                {SUBJECTS.map((s) => (
-                  <div
-                    key={s.title}
-                    className={`select-option ${subject === s.title ? "selected" : ""}`}
-                    onClick={() => {
-                      setSubject(s.title);
-                      setIsOpen(false);
-                    }}
-                  >
-                    {s.title}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button type="submit" className="banner-form-btn">
-            Записаться
-          </button>
-        </form>
+        <BookingForm subjects={subjects.length ? subjects : undefined} />
       </section>
 
       <WaveDivider variant="banner" />
@@ -177,7 +121,7 @@ export default function PifagorHome() {
         <div className="price-box">
           <div className="price-left">
             <h2 className="text-h1-futura">Стоимость одного занятия</h2>
-            <div className="price-value text-h1-unbounded">40 BYN</div>
+            <div className="price-value text-h1-unbounded">{lessonPrice} BYN</div>
 
             <div className="price-features">
               {PRICING_FEATURES.map((f) => (
@@ -214,7 +158,10 @@ export default function PifagorHome() {
       </div>
 
       <div id="reviews">
-        <ReviewsSlider reviewsData={REVIEW_IMAGES} />
+        <ReviewsSlider
+          reviewsData={reviews.length ? undefined : REVIEW_IMAGES}
+          textReviews={reviews.length ? reviews : undefined}
+        />
       </div>
 
       <WaveDivider variant="footer" />

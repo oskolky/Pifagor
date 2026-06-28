@@ -21,6 +21,25 @@
   --text-h3: 24px;
   --text-body-lg: 18px;
   --text-body: 16px;
+
+  /* Форма записи на пробное */
+  --bf-max-width: 1120px;
+  --bf-min-height: 134px;
+  --bf-info-col: 312px;
+  --bf-btn-col: 184px;
+  --bf-gap: 17px;
+  --bf-padding-x: 20px;
+  --bf-radius: 14px;
+  --bf-field-height: 48px;
+  --bf-field-radius: 10px;
+  --bf-field-padding-x: 18px;
+  --bf-btn-height: 54px;
+  --bf-info-height: 120px;
+  --bf-text-sm: 24px;
+  --bf-text-lg: 29px;
+  --bf-form-big: 26px;
+  --bf-label-offset: 18px;
+  --bf-font-size: 18px;
 }
 
 * {

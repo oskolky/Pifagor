@@ -241,54 +241,69 @@
   bottom: -35px;
   transform: translateX(-50%);
   z-index: 20;
-  width: min(980px, calc(100% - 32px));
-  min-height: 112px;
+  width: min(var(--bf-max-width), calc(100% - 32px));
+  min-height: var(--bf-min-height);
   height: auto;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--bf-radius);
   display: grid;
-  grid-template-columns: 260px 1fr 1fr 1fr 170px;
-  gap: 14px;
-  padding-left: 16px;
-  padding-right: 16px;
+  grid-template-columns: var(--bf-info-col) 1fr 1fr 1fr var(--bf-btn-col);
+  gap: var(--bf-gap);
+  padding-left: var(--bf-padding-x);
+  padding-right: var(--bf-padding-x);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
   align-items: center;
 }
 
 .banner-form input,
-.banner-form select {
-  height: 40px;
+.banner-form select,
+.banner-form .select-trigger {
+  height: var(--bf-field-height);
   width: 100%;
   border: 1px solid #dfe3e8;
-  border-radius: 8px;
-  padding: 0 16px;
+  border-radius: var(--bf-field-radius);
+  padding: 0 var(--bf-field-padding-x);
   font-family: var(--font-futura);
-  font-size: var(--font-text-body);
+  font-size: var(--bf-font-size);
   color: #444;
   background: #fff;
   outline: none;
+  box-sizing: border-box;
 }
 
-.banner-form input::placeholder {
+.banner-form .select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.banner-form .select-dropdown {
+  top: calc(var(--bf-field-height) + 6px);
+}
+
+.banner-form input::placeholder,
+.banner-form .select-trigger.placeholder span {
   color: #9ca3af;
 }
 
 .banner-form input:focus,
-.banner-form select:focus {
+.banner-form select:focus,
+.banner-form .select-trigger:focus {
   border-color: #2d5d8f;
 }
 
 .banner-form-btn {
-  height: 45px;
-  width: 153px;
+  height: var(--bf-btn-height);
+  width: var(--bf-btn-col);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--bf-field-radius);
   background: #2d5d8f;
   color: white;
   cursor: pointer;
   transition: background 0.2s;
   font-family: var(--font-futura);
-  font-size: var(--text-body);
+  font-size: var(--bf-font-size);
   font-weight: 400;
 }
 
@@ -297,24 +312,24 @@
 }
 
 .banner-form-info {
-  height: 100px;
+  height: var(--bf-info-height);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .banner-form-small {
-  font-size: 20px;
+  font-size: var(--bf-text-sm);
   color: #8c97a6;
   margin-bottom: 4px;
-  margin-left: 15px;
+  margin-left: var(--bf-label-offset);
 }
 
 .banner-form-big {
-  font-size: 24px;
+  font-size: var(--bf-form-big);
   color: #111827;
   line-height: 1;
-  margin-left: 15px;
+  margin-left: var(--bf-label-offset);
 }
 
 /* ── Sections ── */

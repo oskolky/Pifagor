@@ -96,7 +96,14 @@ export function Header({ currentPage, currentSubject, onHome, onNavigate }: Head
           >
             Отзывы
           </a>
-          <a href={CONTACT.personalCabinet} className="text-h3">
+          <a
+            href="#"
+            className={`text-h3${currentPage === "cabinet" ? " header-link--active" : ""}`}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate("cabinet");
+            }}
+          >
             Личный кабинет
           </a>
           <a

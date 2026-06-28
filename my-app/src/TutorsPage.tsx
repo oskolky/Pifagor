@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "./App.css";
 import "./TutorsPage.css";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { WaveDivider } from "./components/WaveDivider";
 import { ReviewsSlider } from "./components/ReviewsSlider";
+import { BookingForm } from "./components/BookingForm";
+import { TutorApplicationForm } from "./components/TutorApplicationForm";
 import { Logo } from "./components/Logo";
 import alexeyPetrovImg from "./assets/Alexey Petrov.png";
 import tutorsBannerImg from "./assets/tutors.png";
@@ -12,41 +14,58 @@ import arrowIcon from "./assets/Arrow.svg";
 import selectSvg from "./assets/select.svg";
 import { PRICING_FEATURES, REVIEW_IMAGES, SUBJECTS } from "./data/site";
 import { scrollToBookingForm } from "./utils/scroll";
+import { useFaq, usePrices, useReviews, useSubjects, useTutors } from "./hooks/usePublicData";
+import {
+  filterTutorsBySubjectName,
+  mapApiFaq,
+  mapApiTutor,
+  type DisplayTutor,
+} from "./utils/tutors";
 import type { PageKey } from "./types/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface Tutor {
-  name: string;
-  title: string;
-  image?: string;
-  avatarLetter?: string;
-}
 
 interface FAQ {
   question: string;
   answer: string;
 }
 
-// ─── Static data ──────────────────────────────────────────────────────────────
+// ─── Static fallbacks ─────────────────────────────────────────────────────────
 
 const TUTOR_SUBJECTS = SUBJECTS.map(({ title }) => ({ title }));
 
-const TUTORS: Tutor[] = [
-  { name: "Алексей Петров",  title: "Math Diamond Coach",        image: alexeyPetrovImg },
-  { name: "Алексей Петров",  title: "Math Diamond Coach",        image: alexeyPetrovImg },
-  { name: "Алексей Петров",  title: "Math Diamond Coach. 10 стобалльников. Учится в БГУ.", image: alexeyPetrovImg },
+const FALLBACK_TUTORS: DisplayTutor[] = [
+  { id: 1, name: "Алексей Петров", title: "Math Diamond Coach", image: alexeyPetrovImg },
+  { id: 2, name: "Алексей Петров", title: "Math Diamond Coach", image: alexeyPetrovImg },
+  {
+    id: 3,
+    name: "Алексей Петров",
+    title: "Math Diamond Coach. 10 стобалльников. Учится в БГУ.",
+    image: alexeyPetrovImg,
+  },
 ];
 
-const FAQS: FAQ[] = [
-      { "question": "Сколько длится занятие?", "answer": "Стандартное занятие длится 60 минут, однако мы также предлагаем продленные 90-минутные сессии в зависимости от потребностей студента и целей обучения." },
-        { "question": "Нужны ли мне свои материалы?", "answer": "Нет — все необходимые учебные материалы и рабочие листы предоставляет ваш репетитор. Вам понадобятся только блокнот и желание учиться." },
-        { "question": "Могу ли я поменять репетитора?", "answer": "Да, безусловно. Если вы чувствуете, что стиль преподавания вам не совсем подходит, мы бесплатно подберем вам другого специалиста." }
-    ];
+const FALLBACK_FAQS: FAQ[] = [
+  {
+    question: "Сколько длится занятие?",
+    answer:
+      "Стандартное занятие длится 60 минут, однако мы также предлагаем продленные 90-минутные сессии в зависимости от потребностей студента и целей обучения.",
+  },
+  {
+    question: "Нужны ли мне свои материалы?",
+    answer:
+      "Нет — все необходимые учебные материалы и рабочие листы предоставляет ваш репетитор. Вам понадобятся только блокнот и желание учиться.",
+  },
+  {
+    question: "Могу ли я поменять репетитора?",
+    answer:
+      "Да, безусловно. Если вы чувствуете, что стиль преподавания вам не совсем подходит, мы бесплатно подберем вам другого специалиста.",
+  },
+];
 
 // ─── Helper components ────────────────────────────────────────────────────────
 
-function TutorCard({ tutor }: { tutor: Tutor }) {
+function TutorCard({ tutor }: { tutor: DisplayTutor }) {
   return (
     <div className="tutors-page-card">
       <div className="tutors-page-card__photo">
@@ -180,17 +199,26 @@ interface TutorsPageProps {
 }
 
 export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
-  const [name, setName] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [subject, setSubject] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("Английский язык");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const [tutorName, setTutorName] = useState('');
-  const [tutorPhone, setTutorPhone] = useState('');
-  const [tutorSubject, setTutorSubject] = useState('');
-  const [isTutorDropdownOpen, setIsTutorDropdownOpen] = useState(false);
+  const { data: subjects } = useSubjects();
+  const { data: apiTutors } = useTutors();
+  const { data: apiFaqs } = useFaq();
+  const { data: reviews } = useReviews();
+  const { lessonPrice } = usePrices();
+
+  const tutors = useMemo(() => {
+    if (!apiTutors.length) return FALLBACK_TUTORS;
+    const filtered = filterTutorsBySubjectName(apiTutors, selectedSubject);
+    const list = filtered.length ? filtered : apiTutors;
+    return list.map((t) => mapApiTutor(t, alexeyPetrovImg));
+  }, [apiTutors, selectedSubject]);
+
+  const faqs = useMemo(() => {
+    if (!apiFaqs.length) return FALLBACK_FAQS;
+    return mapApiFaq(apiFaqs);
+  }, [apiFaqs]);
 
 
   return (
@@ -210,60 +238,7 @@ export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
             <img src={tutorsBannerImg} alt="" className="banner-image banner-image--tutors" />
           </div>
 
-          <form id="top-booking-form" className="banner-form" onSubmit={e => e.preventDefault()}>
-            <div className="banner-form-info">
-              <div className="banner-form-small">Не уверены в знаниях?</div>
-              <div className="banner-form-big">Запишитесь на пробное!</div>
-            </div>
-
-            <input
-              type="text"
-              placeholder="Имя родителя"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
-
-            <input
-              type="tel"
-              placeholder="Номер телефона"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-            />
-
-            <div className="select-wrapper">
-              <div
-                className={`select-trigger ${!subject ? "placeholder" : ""}`}
-                onClick={() => setIsOpen(!isOpen)}
-              >
-                <span>{subject || "Предмет"}</span>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className={`select-arrow-icon ${isOpen ? "is-open" : ""}`}
-                >
-                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-
-              {isOpen && (
-                <div className="select-dropdown">
-                  {SUBJECTS.map(s => (
-                    <div
-                      key={s.title}
-                      className={`select-option ${subject === s.title ? "selected" : ""}`}
-                      onClick={() => { setSubject(s.title); setIsOpen(false); }}
-                    >
-                      {s.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button type="submit" className="banner-form-btn">
-              Записаться
-            </button>
-          </form>
+          <BookingForm subjects={subjects.length ? subjects : undefined} />
         </section>
 
         <WaveDivider variant="banner" />
@@ -311,15 +286,18 @@ export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
         </div>
 
         <div className="tutors-page-grid">
-          {TUTORS.map((t, i) => (
-            <TutorCard key={i} tutor={t} />
+          {tutors.map((t) => (
+            <TutorCard key={t.id} tutor={t} />
           ))}
         </div>
       </div>
 
       {/* ── Reviews ── */}
       <div id="reviews" style={{ marginTop: 48 }}>
-        <ReviewsSlider reviewsData={REVIEW_IMAGES} />
+        <ReviewsSlider
+          reviewsData={reviews.length ? undefined : REVIEW_IMAGES}
+          textReviews={reviews.length ? reviews : undefined}
+        />
       </div>
 
       {/* ── Pricing ── */}
@@ -336,7 +314,7 @@ export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
         <div className="price-box">
           <div className="price-left">
             <h2 className="text-h1-futura">Стоимость одного занятия</h2>
-            <div className="price-value text-h1-unbounded">40 BYN</div>
+            <div className="price-value text-h1-unbounded">{lessonPrice} BYN</div>
             <div className="price-features">
               {PRICING_FEATURES.map(f => (
                 <div key={f.text} className="price-feature-item">
@@ -384,202 +362,31 @@ export default function TutorsPage({ onBack, onNavigate }: TutorsPageProps) {
           Часто задаваемые вопросы
         </h2>
         <div className="faq-list" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {FAQS.map((faq, i) => (
+          {faqs.map((faq, i) => (
             <FaqItem key={i} faq={faq} />
           ))}
         </div>
       </div>
 
-      {/* ── CTA Join ── */}
-<section style={{ display: 'flex', flexDirection: 'column', gap: '30px', width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '0 20px', boxSizing: 'border-box' }}>
+      <section className="tutors-page-cta">
+        <div className="tutors-page-cta__header">
+          <h2 className="text-h1-unbounded">
+            Хотите
+            <br />
+            присоединиться
+            <br />
+            в команду?
+          </h2>
 
-  {/* Верхняя строка: Заголовок, Стрелка и Делайте строго в один ряд */}
-  <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-    <h2 className="text-h1-unbounded" style={{ margin: 0, padding: 0, lineHeight: '1.2' }}>
-      Хотите<br />присоединиться<br />в команду?
-    </h2>
+          <div className="tutors-page-cta__arrow-wrap">
+            <img src={arrowIcon} alt="Стрелка" />
+          </div>
 
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1 }}>
-      <img src={arrowIcon} alt="Стрелка" style={{ maxWidth: '100px', width: '100%', height: 'auto', display: 'block' }} />
-    </div>
+          <div className="text-h1-unbounded tutors-page-cta__action-label">Делайте!</div>
+        </div>
 
-    <div className="text-h1-unbounded" style={{ margin: 0, padding: 0, whiteSpace: 'nowrap' }}>
-      Делайте!
-    </div>
-  </div>
-
-  {/* Нижняя строка: Аккуратная белая карточка-форма в одну линию */}
-  <form
-    onSubmit={e => e.preventDefault()}
-    style={{
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      background: '#ffffff',
-      padding: '20px 30px',
-      borderRadius: '16px',
-      boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.06)',
-      gap: '20px',
-      width: 'min(980px, calc(100% - 32px))',
-      minHeight: '112px',
-      boxSizing: 'border-box'
-    }}
-  >
-    {/* Левый блок с текстом */}
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0, minWidth: '180px' }}>
-      <div style={{ fontSize: '20px', fontFamily: "Futura PT", color: '#8c97a6', marginBottom: '4px', marginLeft: '0px' }}>Уверены в своих знаниях?</div>
-      <div style={{ fontSize: "24px", fontFamily: "Futura PT", color: "#111827", lineHeight: 1 }}>
-        Мы ждем именно Вас!
-      </div>
-    </div>
-
-    {/* Поля ввода */}
-    <input
-  type="text"
-  placeholder="Ваше имя"
-  value={tutorName}
-  onChange={e => setTutorName(e.target.value)}
-  style={{
-    height: '40px',
-    width: '100%',
-    border: '1px solid #dfe3e8',
-    borderRadius: '8px',
-    padding: '0 16px',
-    fontFamily: 'var(--font-futura)',
-    fontSize: 'var(--font-text-body)',
-    color: '#444',
-    background: '#fff',
-    outline: 'none',
-    boxSizing: 'border-box'
-  }}
-/>
-
-<input
-  type="tel"
-  placeholder="Номер телефона"
-  value={tutorPhone}
-  onChange={e => setTutorPhone(e.target.value)}
-  style={{
-    height: '40px',
-    width: '100%',
-    border: '1px solid #dfe3e8',
-    borderRadius: '8px',
-    padding: '0 16px',
-    fontFamily: 'var(--font-futura)',
-    fontSize: 'var(--font-text-body)',
-    color: '#444',
-    background: '#fff',
-    outline: 'none',
-    boxSizing: 'border-box'
-  }}
-/>
-
-{/* Кастомный селект */}
-<div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
-  <div
-    className={`select-trigger ${!tutorSubject ? "placeholder" : ""}`}
-    onClick={() => setIsTutorDropdownOpen(!isTutorDropdownOpen)}
-    style={{
-      height: '40px',
-      width: '100%',
-      border: '1px solid #dfe3e8',
-      borderRadius: '8px',
-      padding: '0 16px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      background: '#fff',
-      cursor: 'pointer',
-      boxSizing: 'border-box',
-      fontFamily: 'var(--font-futura)',
-      fontSize: 'var(--font-text-body)',
-      color: '#444'
-    }}
-  >
-    <span style={{ color: !tutorSubject ? '#9ca3af' : '#444' }}>
-      {tutorSubject || "Предмет"}
-    </span>
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={`select-arrow-icon ${isTutorDropdownOpen ? "is-open" : ""}`}
-      style={{
-        width: '16px',
-        height: '16px',
-        color: '#7994a6',
-        transform: isTutorDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-        transition: 'transform 0.2s ease'
-      }}
-    >
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  </div>
-
-  {isTutorDropdownOpen && (
-  <div
-    className="select-dropdown"
-    style={{
-      position: 'absolute',
-      top: '46px', /* Сдвинуто под высоту 40px */
-      left: 0,
-      width: '100%',
-      background: '#fff',
-      border: '1px solid #dfe3e8',
-      borderRadius: '8px',
-      zIndex: 100,
-      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-      maxHeight: '200px',
-      overflowY: 'auto'
-    }}
-  >
-    {/* Добавили index в параметры map */}
-    {TUTOR_SUBJECTS.map((s, index) => (
-      <div
-        key={index} /* Заменили s.title на index, чтобы убрать ошибку [object Object] */
-        className={`select-option ${tutorSubject === s.title ? "selected" : ""}`}
-        onClick={() => { setTutorSubject(s.title); setIsTutorDropdownOpen(false); }}
-        style={{
-          padding: '10px 16px',
-          cursor: 'pointer',
-          fontFamily: 'var(--font-futura)',
-          fontSize: 'var(--font-text-body)',
-          background: tutorSubject === s.title ? '#f4faff' : '#fff',
-          color: tutorSubject === s.title ? '#2d5d8f' : '#444'
-        }}
-      >
-        {s.title}
-      </div>
-    ))}
-  </div>
-)}
-</div>
-
-{/* Кнопка отправки */}
-<button
-  type="submit"
-  className="banner-form-btn"
-  style={{
-    height: '45px',
-    width: '153px',
-    border: 'none',
-    borderRadius: '8px',
-    background: '#2d5d8f',
-    color: 'white',
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-    fontFamily: 'var(--font-futura)',
-    fontSize: 'var(--text-body)',
-    fontWeight: 400,
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
-    boxSizing: 'border-box'
-  }}
->
-  Отправить
-</button>
-  </form>
-</section>
+        <TutorApplicationForm subjects={subjects.length ? subjects : undefined} />
+      </section>
 
       <WaveDivider variant="footer" />
       <Footer onHome={onBack} onNavigate={onNavigate} />

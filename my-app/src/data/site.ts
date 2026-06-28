@@ -69,7 +69,6 @@ export const CONTACT = {
   phone: "+375447933870",
   phoneDisplay: "+375 44 793 38 70",
   email: "pifagor@gmail.com",
-  personalCabinet: "mailto:pifagor@gmail.com?subject=Личный%20кабинет",
 };
 
 export const SOCIAL_LINKS = {

@@ -13,15 +13,41 @@ interface FooterProps {
 }
 
 export function Footer({ onHome, onNavigate, isHome = false }: FooterProps) {
-  const handleSubjectsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleBookingClick = () => {
     if (isHome) {
-      scrollToAnchor(ANCHORS.subjects);
+      scrollToBookingForm();
     } else {
       onHome();
-      setTimeout(() => scrollToAnchor(ANCHORS.subjects), 150);
+      setTimeout(scrollToBookingForm, 300);
     }
   };
+
+  const handleSubjectsClick = (e: React.MouseEvent) => {
+  e.preventDefault();
+
+  const scrollWithOffset = () => {
+    const element = document.getElementById(ANCHORS.subjects);
+    if (element) {
+      const headerOffset = 300; // На сколько пикселей опустить экран (высота шапки)
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  if (isHome) {
+    scrollWithOffset();
+  } else {
+    onHome();
+    // 300мс нужно, чтобы успела загрузиться главная страница,
+    // иначе JS не найдет блок с предметами для расчета координат
+    setTimeout(scrollWithOffset, 300);
+  }
+};
 
   const handleAnchorClick = (e: React.MouseEvent, anchor: string) => {
     e.preventDefault();
@@ -80,7 +106,14 @@ export function Footer({ onHome, onNavigate, isHome = false }: FooterProps) {
               >
                 Отзывы
               </a>
-              <a href={CONTACT.personalCabinet} className="footer-link">
+              <a
+                href="#"
+                className="footer-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate("cabinet");
+                }}
+              >
                 Личный кабинет
               </a>
               <a
@@ -93,7 +126,7 @@ export function Footer({ onHome, onNavigate, isHome = false }: FooterProps) {
             </div>
 
             <div className="footer-actions-col">
-              <button type="button" className="footer-cta-btn" onClick={scrollToBookingForm}>
+              <button type="button" className="footer-cta-btn" onClick={handleBookingClick}>
                 Присоединиться к занятиям
               </button>
 

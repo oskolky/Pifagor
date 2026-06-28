@@ -58,54 +58,50 @@
   bottom: -35px !important;
   transform: translateX(-50%) !important;
   z-index: 20 !important;
-  /* ИСПРАВЛЕНО: Растянули ширину до краев контента по сетке */
-  width: min(1120px, calc(100% - 32px)) !important;
-  min-height: 112px;
-  height: auto;
+  width: min(var(--bf-max-width), calc(100% - 32px)) !important;
+  min-height: var(--bf-min-height);
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--bf-radius);
   display: grid !important;
-  /* ИСПРАВЛЕНО: Ровно 5 колонок в ряд под ваши 5 элементов */
-  grid-template-columns: 260px 1fr 1fr 1fr 153px !important;
-  gap: 14px;
-  padding-left: 16px;
-  padding-right: 16px;
+  grid-template-columns: var(--bf-info-col) 1fr 1fr 1fr var(--bf-btn-col) !important;
+  gap: var(--bf-gap);
+  padding-left: var(--bf-padding-x);
+  padding-right: var(--bf-padding-x);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
   align-items: center;
   box-sizing: border-box !important;
 }
 
 .tutors-banner .banner-form-info {
-  height: 100px;
+  height: var(--bf-info-height);
   display: flex;
   flex-direction: column;
-  justifyContent: center;
+  justify-content: center;
 }
 
 .tutors-banner .banner-form-small {
-  font-size: 20px;
+  font-size: var(--bf-text-sm);
   color: #8c97a6;
   margin-bottom: 4px;
-  margin-left: 15px;
+  margin-left: var(--bf-label-offset);
 }
 
 .tutors-banner .banner-form-big {
-  font-size: 24px;
+  font-size: var(--bf-form-big);
   color: #111827;
   line-height: 1;
-  margin-left: 15px;
+  margin-left: var(--bf-label-offset);
 }
-/* ИСПРАВЛЕНО: Удалена лишняя закрывающая скобка }, которая была тут и ломала код ниже */
 
 .tutors-banner .banner-form input,
 .tutors-banner .select-trigger {
-  height: 40px;
+  height: var(--bf-field-height);
   width: 100%;
   border: 1px solid #dfe3e8;
-  border-radius: 8px;
-  padding: 0 16px;
+  border-radius: var(--bf-field-radius);
+  padding: 0 var(--bf-field-padding-x);
   font-family: var(--font-futura);
-  font-size: var(--text-body);
+  font-size: var(--bf-font-size);
   color: #444;
   background: #fff;
   outline: none;
@@ -142,7 +138,7 @@
 
 .tutors-banner .select-dropdown {
   position: absolute;
-  top: 46px;
+  top: calc(var(--bf-field-height) + 6px);
   left: 0;
   width: 100%;
   background: #fff;
@@ -169,16 +165,16 @@
 }
 
 .tutors-banner .banner-form-btn {
-  height: 45px;
-  width: 153px;
+  height: var(--bf-btn-height);
+  width: var(--bf-btn-col);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--bf-field-radius);
   background: #2d5d8f;
   color: white;
   cursor: pointer;
   transition: background 0.2s;
   font-family: var(--font-futura);
-  font-size: var(--text-body);
+  font-size: var(--bf-font-size);
   font-weight: 400;
 }
 
@@ -310,19 +306,99 @@
 
 /* ── CTA join section ── */
 
+.tutors-page-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.tutors-page-cta__header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.tutors-page-cta__header h2 {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.tutors-page-cta__arrow-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.tutors-page-cta__arrow-wrap img {
+  max-width: 100px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.tutors-page-cta__action-label {
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.tutors-page-cta__select-dropdown {
+  position: absolute;
+  top: calc(var(--bf-field-height) + 6px);
+  left: 0;
+  width: 100%;
+  min-width: max(100%, 200px);
+  background: #fff;
+  border: 1px solid #dfe3e8;
+  border-radius: var(--bf-field-radius);
+  z-index: 200;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tutors-page-cta__select-option {
+  padding: 10px var(--bf-field-padding-x);
+  cursor: pointer;
+  font-family: var(--font-futura);
+  font-size: var(--bf-font-size);
+  background: #fff;
+  color: #444;
+}
+
+.tutors-page-cta__select-option:hover,
+.tutors-page-cta__select-option.selected {
+  background: #f4faff;
+  color: #2d5d8f;
+}
+
 /* Новая чистая белая карточка-форма */
 .tutors-page-cta__card-form {
   display: flex !important;
   flex-direction: row !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: flex-start !important;
   background: #ffffff !important;
-  padding: 20px 30px !important;
-  border-radius: 16px !important;
+  padding: var(--bf-padding-x) calc(var(--bf-padding-x) + 10px) !important;
+  border-radius: var(--bf-radius) !important;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.06) !important;
-  gap: 20px !important;
+  gap: var(--bf-gap) !important;
   width: 100% !important;
+  max-width: 100% !important;
+  min-height: var(--bf-min-height) !important;
   box-sizing: border-box !important;
+  overflow: visible !important;
 }
 
 /* Фиксируем текст слева, чтобы он шел аккуратно и не ломал строку */
@@ -331,63 +407,98 @@
   flex-direction: column !important;
   gap: 4px !important;
   flex-shrink: 0 !important;
-  min-width: 180px !important;
+  min-width: var(--bf-info-col) !important;
 }
 
 .tutors-page-cta__form-small {
-  font-size: 13px !important;
-  color: #7a7a7a !important;
+  font-size: var(--bf-text-sm) !important;
+  color: #8c97a6 !important;
 }
 
 .tutors-page-cta__form-big {
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  color: #111111 !important;
-  white-space: nowrap !important; /* Запрещаем перенос слов в названии */
+  font-size: var(--bf-text-lg) !important;
+  font-weight: 400 !important;
+  color: #111827 !important;
+  white-space: nowrap !important;
 }
 
 /* Одинаковые аккуратные инпуты */
 .tutors-page-cta__input {
-  flex: 1 !important;
-  height: 48px !important;
-  padding: 0 16px !important;
-  border: 1px solid #e0e0e0 !important;
-  border-radius: 8px !important;
+  flex: 1 1 140px !important;
+  min-width: 0 !important;
+  height: var(--bf-field-height) !important;
+  padding: 0 var(--bf-field-padding-x) !important;
+  border: 1px solid #dfe3e8 !important;
+  border-radius: var(--bf-field-radius) !important;
   background: #fff !important;
-  font-size: 14px !important;
+  font-family: var(--font-futura) !important;
+  font-size: var(--bf-font-size) !important;
   outline: none !important;
+  box-sizing: border-box !important;
 }
 
 /* Кастомный селект */
 .tutors-page-cta__select-wrapper {
-  flex: 1 !important;
+  flex: 1 1 180px !important;
+  min-width: 0 !important;
   position: relative !important;
+  overflow: visible !important;
 }
 
 .tutors-page-cta__select-trigger {
-  height: 48px !important;
-  border: 1px solid #e0e0e0 !important;
-  border-radius: 8px !important;
-  padding: 0 16px !important;
+  height: var(--bf-field-height) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  border: 1px solid #dfe3e8 !important;
+  border-radius: var(--bf-field-radius) !important;
+  padding: 0 var(--bf-field-padding-x) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  gap: 8px !important;
   background: #fff !important;
   cursor: pointer !important;
+  font-family: var(--font-futura) !important;
+  font-size: var(--bf-font-size) !important;
+  color: #444 !important;
+  box-sizing: border-box !important;
+}
+
+.tutors-page-cta__select-trigger span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.tutors-page-cta__select-trigger.placeholder span {
+  color: #9ca3af !important;
 }
 
 /* Кнопка "Отправить" */
 .tutors-page-cta__btn {
   background: #1d5280 !important;
   color: #fff !important;
-  height: 48px !important;
-  padding: 0 32px !important;
+  height: var(--bf-field-height) !important;
+  min-width: 0 !important;
+  flex: 0 1 var(--bf-btn-col) !important;
+  max-width: 100% !important;
+  padding: 0 calc(var(--bf-field-padding-x) + 6px) !important;
   border: none !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
+  border-radius: var(--bf-field-radius) !important;
+  font-family: var(--font-futura) !important;
+  font-size: var(--bf-font-size) !important;
+  font-weight: 400 !important;
   cursor: pointer !important;
   white-space: nowrap !important;
-  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.tutors-page-cta__feedback {
+  flex: 1 1 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .tutors-page-filter-btn {
@@ -484,6 +595,26 @@
 
   .tutors-page-cta__arrow {
     display: none;
+  }
+
+  .tutors-page-cta__card-form {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .tutors-page-cta__form-info {
+    min-width: unset !important;
+  }
+
+  .tutors-page-cta__input,
+  .tutors-page-cta__select-wrapper {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+
+  .tutors-page-cta__btn {
+    flex: 1 1 100% !important;
+    width: 100% !important;
   }
 }
 

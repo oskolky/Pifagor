@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Logo } from "./components/Logo";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { WaveDivider } from "./components/WaveDivider";
 import { ReviewsSlider } from "./components/ReviewsSlider";
+import { BookingForm } from "./components/BookingForm";
 import waveBlue from "./assets/wave_blue.svg";
 import alexeyPetrovImg from "./assets/Alexey Petrov.png";
 import homeImg from "./assets/homelander.png";
@@ -12,8 +13,15 @@ import engStatue from "./assets/main_page/eng_statue.png";
 import physicsStatue from "./assets/main_page/physics_statue.png";
 import chemStatue from "./assets/main_page/chem_statue.png";
 import chemistryBack from "./assets/chemistry_back.png";
-import { PRICING_FEATURES, REVIEW_IMAGES, SUBJECTS_NAV } from "./data/site";
+import { PRICING_FEATURES, REVIEW_IMAGES } from "./data/site";
 import { scrollToBookingForm } from "./utils/scroll";
+import { useFaq, usePrices, useReviews, useSubjects, useTutors } from "./hooks/usePublicData";
+import {
+  filterTutorsBySubjectKey,
+  findSubjectIdByKey,
+  mapApiFaq,
+  mapApiTutor,
+} from "./utils/tutors";
 import type { PageKey, SubjectKey } from "./types/navigation";
 import "./SubjectPage.css";
 
@@ -407,10 +415,33 @@ interface SubjectPageProps {
 
 export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPageProps) {
   const cfg = SUBJECT_CONFIGS[subject];
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [formSubject, setFormSubject] = useState(SUBJECT_CONFIGS[subject].title);
-  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const { data: subjects } = useSubjects();
+  const { data: apiTutors } = useTutors();
+  const subjectId = findSubjectIdByKey(subjects, subject);
+  const { data: apiFaqs } = useFaq(subjectId);
+  const { data: reviews } = useReviews();
+  const { lessonPrice } = usePrices(subjectId);
+
+  const tutors = useMemo((): Tutor[] => {
+    if (!apiTutors.length) return cfg.tutors;
+    const filtered = filterTutorsBySubjectKey(apiTutors, subject);
+    const list = filtered.length ? filtered : apiTutors;
+    return list.slice(0, 3).map((t) => {
+      const mapped = mapApiTutor(t, alexeyPetrovImg);
+      return {
+        name: mapped.name,
+        title: mapped.title,
+        avatarLetter: mapped.avatarLetter,
+        avatarColor: cfg.accentColor,
+        image: mapped.image,
+      };
+    });
+  }, [apiTutors, subject, cfg.tutors, cfg.accentColor]);
+
+  const faqs = useMemo(() => {
+    if (!apiFaqs.length) return cfg.faqs;
+    return mapApiFaq(apiFaqs);
+  }, [apiFaqs, cfg.faqs]);
 
   return (
     <div className="app">
@@ -459,59 +490,10 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
           <img src={cfg.bannerImage} alt="" className="banner-image banner-image--subject" style={cfg.imageStyle} />
         </div>
 
-        <form id="top-booking-form" className="banner-form" onSubmit={e => e.preventDefault()}>
-          <div className="banner-form-info">
-            <div className="banner-form-small">Не уверены в знаниях?</div>
-            <div className="banner-form-big">Запишитесь на пробное!</div>
-          </div>
-
-          <input
-            type="text"
-            placeholder="Имя родителя"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-
-          <input
-            type="tel"
-            placeholder="Номер телефона"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
-          />
-
-          <div className="select-wrapper">
-            <div
-              className={`select-trigger${!formSubject ? " placeholder" : ""}`}
-              onClick={() => setIsSelectOpen(!isSelectOpen)}
-            >
-              <span>{formSubject || "Предмет"}</span>
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className={`select-arrow-icon${isSelectOpen ? " is-open" : ""}`}
-              >
-                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            {isSelectOpen && (
-              <div className="select-dropdown">
-                {SUBJECTS_NAV.map(s => (
-                  <div
-                    key={s.key}
-                    className={`select-option${formSubject === SUBJECT_CONFIGS[s.key].title ? " selected" : ""}`}
-                    onClick={() => { setFormSubject(SUBJECT_CONFIGS[s.key].title); setIsSelectOpen(false); }}
-                  >
-                    {SUBJECT_CONFIGS[s.key].title}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button type="submit" className="banner-form-btn">
-            Записаться
-          </button>
-        </form>
+        <BookingForm
+          defaultSubject={cfg.title}
+          subjects={subjects.length ? subjects : undefined}
+        />
       </section>
 
       <WaveDivider variant="banner" src={cfg.waveColor === "blue" ? waveBlue : undefined} />
@@ -536,7 +518,7 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
             flexWrap: 'wrap'
           }}
         >
-          {cfg.tutors.map((t, i) => (
+          {tutors.map((t, i) => (
             <TutorCard key={i} tutor={t} accentColor={cfg.accentColor} />
           ))}
         </div>
@@ -546,7 +528,10 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
       {/* ── Reviews ── */}
       <div id="reviews">
         <div style={{ marginTop: 48 }}>
-          <ReviewsSlider reviewsData={REVIEW_IMAGES} />
+          <ReviewsSlider
+            reviewsData={reviews.length ? undefined : REVIEW_IMAGES}
+            textReviews={reviews.length ? reviews : undefined}
+          />
         </div>
       </div>
       {/* ── Pricing ── */}
@@ -560,7 +545,7 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
         <div className="price-box">
           <div className="price-left">
             <h2 className="text-h1-futura">Стоимость одного занятия</h2>
-            <div className="price-value text-h1-unbounded">40 BYN</div>
+            <div className="price-value text-h1-unbounded">{lessonPrice} BYN</div>
             <div className="price-features">
               {PRICING_FEATURES.map(f => (
                 <div key={f.text} className="price-feature-item">
@@ -615,7 +600,7 @@ export default function SubjectPage({ subject, onBack, onNavigate }: SubjectPage
         Часто задаваемые вопросы
       </h2>
       <div className="faq-list" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {cfg.faqs.map((faq, i) => (
+        {faqs.map((faq, i) => (
           // Добавили проп accentColor
           <FaqItem key={i} faq={faq} accentColor={cfg.accentColor} />
         ))}
